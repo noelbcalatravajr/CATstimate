@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ArcRise Estimator — CATstimate</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e2e6e">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CATstimate · ArcRise">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1e2e6e;--navy-deep:#0f2350;--ink:#0b1a3a;--ink-2:#3a4a78;--muted:#8896c8;
+  --blue:#1d4ed8;--blue-2:#1e40af;--blue-soft:#e8eeff;--blue-bg:#e6eef8;--blue-border:#c8d4f8;
+  --amber:#c07a10;--amber-soft:#fff5e0;--amber-border:#f0d8a0;--hat:#f4c91a;
+  --green:#1a8a55;--green-soft:#e6f9f0;--green-border:#a8e4c8;
+  --red:#c03030;--red-soft:#fff0f0;--red-border:#f8c8c8;
+  --bg-page:#eef3fa;--surface:#fff;--surface-2:#f8f9fd;--border:#e2e6f0;--border-2:#dde2f0;
+  --font-body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --font-pixel:"Silkscreen",monospace;
+  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  --pixel:2px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:rgba(0,0,0,.1);touch-action:manipulation}
+html,body{height:100%}
+body{
+  font-family:var(--font-body);background:var(--bg-page);color:var(--ink);font-size:14px;line-height:1.5;
+  background-image:linear-gradient(to right,rgba(29,78,216,.06) 1px,transparent 1px),linear-gradient(to bottom,rgba(29,78,216,.06) 1px,transparent 1px);
+  background-size:24px 24px;
+  padding:2rem .75rem 3rem;max-width:760px;margin:0 auto;-webkit-overflow-scrolling:touch;-webkit-font-smoothing:antialiased;
+}
+.pixel-art{image-rendering:pixelated;image-rendering:crisp-edges}
+button{font-family:inherit}
+
+/* HEADER */
+.app-header{background:var(--navy);color:#fff;border:var(--pixel) solid var(--ink);box-shadow:4px 4px 0 0 var(--ink);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px;position:relative}
+.app-header::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:12px 12px;pointer-events:none}
+.header-left{display:flex;align-items:center;gap:14px;position:relative;z-index:1;min-width:0}
+.cat-wrap{position:relative;width:52px;height:52px;flex-shrink:0;cursor:pointer}
+.cat-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity 260ms ease;user-select:none;pointer-events:none}
+.cat-wrap img.on{opacity:1}
+.cat-bubble{position:absolute;left:50%;top:-26px;transform:translateX(-50%);background:#fff;color:var(--ink);padding:4px 9px;font-size:10px;font-family:var(--font-pixel);white-space:nowrap;border:var(--pixel) solid var(--ink);box-shadow:2px 2px 0 0 var(--ink);z-index:5;pointer-events:none;animation:bubble-in .25s ease-out both}
+.cat-bubble::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-4px;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--ink)}
+@keyframes bubble-in{0%{opacity:0;transform:translate(-50%,-10px) scale(.6)}60%{opacity:1;transform:translate(-50%,-2px) scale(1.05)}100%{opacity:1;transform:translate(-50%,0) scale(1)}}
+.header-brand{font-family:var(--font-pixel);font-size:18px;color:#fff;line-height:1;letter-spacing:.02em}
+.header-subtitle{font-size:9px;font-weight:700;color:#7ecfb3;letter-spacing:.18em;text-transform:uppercase;font-family:var(--font-mono);margin-top:6px}
+.header-author{font-size:10px;color:#a4b0d8;margin-top:3px;font-family:var(--font-mono);letter-spacing:.08em}
+.header-version{font-size:10px;color:#a4b0d8;background:rgba(255,255,255,.1);padding:4px 10px;border:1px solid rgba(255,255,255,.18);white-space:nowrap;font-family:var(--font-mono);letter-spacing:.06em;position:relative;z-index:1}
+
+/* CARDS */
+.flat-card{background:var(--surface);border:var(--pixel) solid var(--ink);box-shadow:4px 4px 0 0 var(--ink);padding:18px 20px;margin-bottom:18px}
+.section-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-family:var(--font-mono);margin-bottom:14px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.seg-count{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-soft);padding:3px 10px;border:var(--pixel) solid var(--ink);font-family:var(--font-mono);letter-spacing:.04em}
+
+/* FORM */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;color:var(--ink-2);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono)}
+input[type="number"],input[type="text"],select{font-size:13px;background:var(--surface);color:var(--ink);border:var(--pixel) solid var(--ink);padding:8px 12px;outline:none;width:100%;font-family:inherit;transition:box-shadow .15s;-webkit-appearance:none;border-radius:0}
+input:focus,select:focus{box-shadow:3px 3px 0 0 var(--blue)}
+input::placeholder{color:#b0bcd8}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%231d4ed8'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer;appearance:none}
+
+/* SEGMENT BLOCK */
+.segment-block{background:var(--surface-2);border:var(--pixel) solid var(--ink);padding:14px;margin-bottom:12px}
+.seg-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.seg-badge{font-size:10px;font-weight:700;padding:3px 10px;white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-mono);border:var(--pixel) solid var(--ink)}
+.badge-ramp{background:var(--blue-soft);color:var(--blue)}
+.badge-landing{background:var(--amber-soft);color:var(--amber)}
+.seg-name-wrap{flex:1;min-width:140px}
+.seg-name-wrap input{font-weight:600;padding:5px 10px;background:var(--surface)}
+
+.btn-remove{background:var(--red-soft);border:var(--pixel) solid var(--ink);cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:15px;font-weight:700;flex-shrink:0;margin-left:auto;font-family:inherit;box-shadow:2px 2px 0 0 var(--ink)}
+.btn-remove:hover{background:var(--red);color:#fff;transform:translate(1px,1px);box-shadow:1px 1px 0 0 var(--ink)}
+.btn-remove:active{transform:translate(2px,2px);box-shadow:none}
+
+/* LINES STEPPER */
+.lines-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.lines-label{font-size:10px;font-weight:700;color:var(--ink-2);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;font-family:var(--font-mono)}
+.lines-stepper{display:inline-flex;align-items:center;border:var(--pixel) solid var(--ink);overflow:hidden}
+.step-btn{width:32px;height:32px;border:none;background:#eef0f8;color:var(--blue);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;font-family:inherit}
+.step-btn:hover{background:var(--blue);color:#fff}
+.lines-val{font-size:14px;font-weight:700;min-width:36px;text-align:center;color:var(--ink);border-left:var(--pixel) solid var(--ink);border-right:var(--pixel) solid var(--ink);height:32px;display:flex;align-items:center;justify-content:center;background:#fff;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.lines-unit{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+
+/* ARC BLOCK */
+.arc-block{background:var(--surface);border:var(--pixel) solid var(--ink);padding:12px;margin-bottom:12px}
+.arc-block-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-family:var(--font-mono)}
+.arc-block-title span{color:#b0bcd8;font-weight:400;text-transform:none;letter-spacing:0}
+.arc-line-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.arc-line-row:last-child{margin-bottom:0}
+.arc-line-label{font-size:11px;color:var(--ink-2);font-weight:600;min-width:46px;flex-shrink:0;font-family:var(--font-mono)}
+.arc-line-input-wrap{flex:1;min-width:0}
+.arc-line-input-wrap input{padding:6px 10px}
+.arc-line-result{font-size:11px;color:var(--blue);font-weight:700;min-width:84px;text-align:right;flex-shrink:0;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+/* ELEVATION TABS */
+.elev-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;font-family:var(--font-mono)}
+.elevation-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.etab{font-size:11px;font-weight:600;padding:6px 12px;border:var(--pixel) solid var(--ink);box-shadow:2px 2px 0 0 var(--ink);cursor:pointer;background:var(--surface);color:var(--blue);transition:all .12s;font-family:var(--font-mono);letter-spacing:.04em;text-transform:uppercase}
+.etab:hover{background:var(--blue-soft);transform:translate(1px,1px);box-shadow:1px 1px 0 0 var(--ink)}
+.etab.active{background:var(--ink);color:#fff;transform:translate(2px,2px);box-shadow:none}
+.elevation-panel{display:none}
+.elevation-panel.active{display:block}
+
+/* NOTES */
+.info-note{font-size:11px;color:var(--ink-2);background:var(--surface-2);padding:8px 12px;margin-top:6px;border:var(--pixel) solid var(--ink);line-height:1.5}
+.assumption-note{font-size:11px;padding:8px 12px;margin-top:8px;background:#fffbec;color:#9a6a00;border:var(--pixel) solid var(--ink);line-height:1.5}
+
+/* SEG CALC */
+.seg-calc{font-size:12px;color:var(--ink-2);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);font-family:var(--font-mono)}
+.seg-calc span{color:var(--blue);font-weight:700;font-variant-numeric:tabular-nums}
+
+/* RESULTS */
+.results-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.metric-card{background:var(--blue-bg);border:var(--pixel) solid var(--ink);box-shadow:3px 3px 0 0 var(--ink);padding:14px 12px;text-align:center}
+.metric-label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-family:var(--font-mono)}
+.metric-value{font-size:24px;font-weight:700;color:var(--blue);font-family:var(--font-pixel);letter-spacing:.02em;font-variant-numeric:tabular-nums;line-height:1}
+.metric-unit{font-size:10px;color:var(--muted);margin-left:3px;font-weight:400;font-family:var(--font-mono)}
+
+/* TABLE */
+.breakdown-wrap{border:var(--pixel) solid var(--ink);overflow:hidden}
+.breakdown-table{width:100%;font-size:12px;border-collapse:collapse;background:var(--surface);table-layout:fixed}
+.breakdown-table th{text-align:left;padding:8px 10px;color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.06em;border-bottom:var(--pixel) solid var(--ink);background:var(--surface-2);font-family:var(--font-mono)}
+.breakdown-table td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.breakdown-table tr:last-child td{border-bottom:none}
+.total-row td{font-weight:700;color:var(--blue);background:var(--blue-bg)}
+.sub-row td{color:var(--ink-2);font-size:11px;padding:4px 10px 4px 22px;background:#fafbfe}
+.warn-row td{font-size:10px;color:#9a6a00;padding:6px 10px;background:#fffbec}
+
+/* ADD SEG ROW */
+.add-seg-row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.add-seg-row .btn{flex:1;min-width:160px}
+
+/* BTNS */
+.btn{padding:9px 16px;cursor:pointer;font-size:13px;font-weight:700;border:var(--pixel) solid var(--ink);box-shadow:3px 3px 0 0 var(--ink);transition:all .12s;font-family:inherit;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn:hover{transform:translate(1px,1px);box-shadow:2px 2px 0 0 var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:none}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-2)}
+.btn-outline{background:var(--blue-soft);color:var(--blue)}
+.btn-outline:hover{background:var(--blue);color:#fff}
+.btn-amber{background:var(--amber-soft);color:var(--amber)}
+.btn-amber:hover{background:var(--amber);color:#fff}
+.btn-success{background:var(--green-soft);color:var(--green)}
+.btn-success:hover{background:var(--green);color:#fff}
+.btn-danger{background:var(--red-soft);color:var(--red)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-sm{padding:4px 10px;font-size:11px;box-shadow:2px 2px 0 0 var(--ink)}
+
+/* EMPTY */
+.empty-state{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 16px;text-align:center}
+.empty-state .es-title{font-family:var(--font-pixel);font-size:14px;color:var(--navy-deep);letter-spacing:.02em;margin-top:8px}
+.empty-state .es-body{font-size:12px;color:var(--ink-2);max-width:320px;line-height:1.5}
+
+/* HELP */
+.help-panel{background:var(--surface-2);border:var(--pixel) solid var(--ink);margin-bottom:14px;overflow:hidden}
+.help-toggle{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;user-select:none}
+.help-toggle:hover{background:var(--blue-soft)}
+.help-toggle-left{font-size:11px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono)}
+.help-icon{font-size:13px;color:var(--blue);transition:transform .25s;font-family:var(--font-mono)}
+.help-icon.open{transform:rotate(180deg)}
+.help-body{padding:0 1.1rem 1.1rem;font-size:12px;color:var(--ink-2);line-height:1.7}
+.help-body ol{padding-left:1.2rem}
+.help-body strong{color:var(--ink)}
+
+.app-footer{text-align:center;font-size:11px;color:var(--muted);padding-top:12px;margin-top:4px;font-family:var(--font-mono);letter-spacing:.08em}
+.app-footer .heart{color:var(--amber)}
+
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.actions .btn{flex:1;min-width:140px}
+
+@media(max-width:500px){
+  .field-row,.field-row-3{grid-template-columns:1fr}
+  .results-grid{grid-template-columns:1fr 1fr}
+}
+
+@supports (-webkit-touch-callout: none){input,select,textarea{font-size:16px!important}}
+@supports(padding:env(safe-area-inset-top)){body{padding-top:max(2rem,env(safe-area-inset-top));padding-left:max(.75rem,env(safe-area-inset-left));padding-right:max(.75rem,env(safe-area-inset-right));padding-bottom:max(3rem,env(safe-area-inset-bottom))}}
+@media print{
+  body{background:#fff;background-image:none;padding:0;max-width:none}
+  .no-print{display:none!important}
+  .flat-card,.app-header{box-shadow:none;break-inside:avoid}
+  .app-header{background:var(--navy)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .metric-card{background:var(--blue-bg)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;box-shadow:none}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-left">
+    <div class="cat-wrap" id="catWrap" title="Tap me!">
+      <img class="pixel-art on"  id="cat-idle"    src="assets/catstimate-logo.png" alt="">
+      <img class="pixel-art"     id="cat-wave"    src="assets/cat-wave.png"        alt="">
+      <img class="pixel-art"     id="cat-sleep"   src="assets/cat-sleep.png"       alt="">
+      <img class="pixel-art"     id="cat-wrench"  src="assets/cat-wrench.png"      alt="">
+      <img class="pixel-art"     id="cat-hat-tip" src="assets/cat-hat-tip.png"     alt="">
+      <div id="catBubble"></div>
+    </div>
+    <div style="min-width:0">
+      <div class="header-brand">CATstimate</div>
+      <div class="header-subtitle">ArcRise</div>
+      <div class="header-author">by N.Calatrava</div>
+    </div>
+  </div>
+  <span class="header-version">v1.1 · May 2026</span>
+</header>
+
+<!-- PROJECT -->
+<div class="flat-card no-print">
+  <div class="section-title">Project details</div>
+  <div class="field-row">
+    <div class="field"><label>Project name</label><input type="text" id="proj-name" placeholder="e.g. Mango Street Residence"></div>
+    <div class="field"><label>Client / contractor</label><input type="text" id="proj-client" placeholder="e.g. Santos Construction"></div>
+  </div>
+</div>
+
+<!-- HELP -->
+<div class="help-panel no-print">
+  <div class="help-toggle" id="htog">
+    <span class="help-toggle-left">ℹ How to use ArcRise</span>
+    <span class="help-icon open" id="hicon">▼</span>
+  </div>
+  <div id="help-body" class="help-body">
+    <ol>
+      <li>Add one <strong>segment</strong> per continuous run — a stair flight, a ramp, or a landing.</li>
+      <li>Set the number of <strong>handrail lines</strong> (top rail, mid rail, etc.) — each line has its own arc length.</li>
+      <li>Enter each line's <strong>horizontal arc length</strong>.</li>
+      <li>Pick an <strong>elevation method</strong> — RL values, slope ratio, slope angle, fall (1:n), step count, or an assumed slope.</li>
+      <li>Results update live. Net total + wastage and a per-line breakdown appear at the bottom.</li>
+    </ol>
+    <div class="info-note" style="margin-top:10px">Inclined length = √(arc² + rise²). End allowance is added to both ends of every line.</div>
+  </div>
+</div>
+
+<!-- GENERAL SETTINGS -->
+<div class="flat-card no-print">
+  <div class="section-title">General settings</div>
+  <div class="field-row">
+    <div class="field"><label>Wastage / Overlap (%)</label><input type="number" id="wastage" value="5" min="0" max="50" step="0.5"></div>
+    <div class="field"><label>End Allowance per Segment (m)</label><input type="number" id="endAllowance" value="0.1" min="0" step="0.05"></div>
+  </div>
+  <div class="field-row">
+    <div class="field"><label>Unit</label><select id="unit"><option value="m" selected>Metres (m)</option><option value="mm">Millimetres (mm)</option></select></div>
+    <div class="field" style="justify-content:flex-end;"><label style="visibility:hidden">x</label><div class="info-note">Handrail lines and arc lengths set per segment</div></div>
+  </div>
+</div>
+
+<!-- SEGMENTS -->
+<div class="flat-card">
+  <div class="section-header">
+    <span class="section-title" style="margin-bottom:0;">Segments</span>
+    <span class="seg-count" id="segCountLabel">0 segments</span>
+  </div>
+  <div id="segmentList"></div>
+  <div id="seg-empty"></div>
+  <div class="add-seg-row no-print">
+    <button class="btn btn-outline" onclick="addSegment('ramp')">＋ Add Ramp / Stair</button>
+    <button class="btn btn-amber" onclick="addSegment('landing')">＋ Add Landing</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="flat-card">
+  <div class="section-title">Results</div>
+  <div class="results-grid">
+    <div class="metric-card"><div class="metric-label">Net Total</div><div class="metric-value" id="res-net">0.000<span class="metric-unit">m</span></div></div>
+    <div class="metric-card"><div class="metric-label">With Wastage</div><div class="metric-value" id="res-wastage">0.000<span class="metric-unit">m</span></div></div>
+    <div class="metric-card"><div class="metric-label">Segments</div><div class="metric-value" id="res-segs">0<span class="metric-unit">segs</span></div></div>
+  </div>
+  <div class="breakdown-wrap">
+    <table class="breakdown-table">
+      <thead><tr><th style="width:30%">Segment / Line</th><th style="width:16%">Horiz (m)</th><th style="width:16%">Rise (m)</th><th style="width:19%">Inclined</th><th style="width:19%">+Ends</th></tr></thead>
+      <tbody id="breakdownBody"><tr><td colspan="5" style="color:var(--muted);font-style:italic;padding:14px 10px;">No segments added yet</td></tr></tbody>
+      <tfoot id="breakdownFoot"></tfoot>
+    </table>
+  </div>
+</div>
+
+<div class="actions no-print">
+  <button class="btn btn-primary" id="btn-dl">↓ Download report</button>
+  <button class="btn btn-outline" onclick="window.print()">⎙ Print</button>
+  <button class="btn btn-danger" id="btn-clear">✕ Clear all segments</button>
+</div>
+
+<footer class="app-footer">CATstimate ArcRise v1.1 · May 2026 · <span class="heart">made by</span> N.Calatrava · Free to use · No internet required</footer>
+
+<script src="arcrise.js"></script>
+<script>
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW:', e)));
+  }
+</script>
+</body>
+</html>
