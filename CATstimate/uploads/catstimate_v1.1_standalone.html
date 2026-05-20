@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CATstimate v1.1 — Cutting List Calculator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:rgba(0,0,0,.1);touch-action:manipulation}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f8;color:#1a2340;padding:1rem .75rem 3rem;max-width:720px;margin:0 auto;-webkit-overflow-scrolling:touch}
+
+/* HEADER */
+.app-header{background:#1e2e6e;border-radius:12px;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;box-shadow:0 4px 16px rgba(30,46,110,.25)}
+.header-left{display:flex;align-items:center;gap:14px}
+.cat-logo{width:52px;height:52px;border-radius:10px;flex-shrink:0}
+.header-brand{font-size:22px;font-weight:800;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important;letter-spacing:-.01em;line-height:1.1}
+.header-subtitle{font-size:10px;font-weight:700;color:#7ecfb3!important;-webkit-text-fill-color:#7ecfb3!important;letter-spacing:.16em;text-transform:uppercase}
+.header-author{font-size:11px;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important;margin-top:1px}
+.header-version{font-size:11px;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important;background:rgba(255,255,255,.1);padding:4px 12px;border-radius:20px;white-space:nowrap}
+
+/* TABS */
+.mode-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{flex:1;min-width:120px;padding:9px 10px;border:1.5px solid #dde2f0;border-radius:8px;background:#ffffff!important;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;cursor:pointer;font-size:12px;font-weight:700;text-align:center;transition:all .2s;font-family:inherit}
+.tab.active{background:#3a5bd9!important;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important;border-color:#3a5bd9}
+.tab:hover:not(.active){background:#eef1ff!important;border-color:#3a5bd9}
+
+/* FLAT CARD */
+.flat-card{background:#ffffff;border-radius:10px;border:1px solid #e2e6f0;padding:1.1rem 1.25rem;margin-bottom:14px}
+.section-title{font-size:10px;font-weight:700;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.pill-count{font-size:11px;font-weight:700;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;background:#e8eeff;border-radius:20px;padding:3px 10px;border:1px solid #c8d4f8}
+
+/* FORM FIELDS */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.field-row-1{display:grid;grid-template-columns:1fr;gap:0;margin-bottom:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;color:#5a6a9a!important;-webkit-text-fill-color:#5a6a9a!important;text-transform:uppercase;letter-spacing:.06em}
+input[type="number"],input[type="text"],textarea,select{font-size:13px!important;background:#ffffff!important;color:#1a2340!important;-webkit-text-fill-color:#1a2340!important;border:1.5px solid #dde2f0!important;border-radius:6px!important;padding:8px 12px!important;outline:none!important;width:100%!important;font-family:inherit!important;transition:border-color .15s;height:auto;-webkit-appearance:none}
+input[type="number"]:focus,input[type="text"]:focus,textarea:focus,select:focus{border-color:#3a5bd9!important}
+input::placeholder,textarea::placeholder{color:#b0bcd8!important;-webkit-text-fill-color:#b0bcd8!important}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238896c8'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 12px center!important;padding-right:32px!important;cursor:pointer;appearance:none!important}
+select option{background:#ffffff!important;color:#1a2340!important}
+
+/* SEGMENT BLOCK */
+.segment-block{background:#f8f9fd;border-radius:10px;border:1px solid #e2e6f0;padding:14px;margin-bottom:12px}
+.seg-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.seg-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.06em}
+.badge-blue{background:#e8eeff;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;border:1px solid #c8d4f8}
+.badge-amber{background:#fff5e0;color:#c07a10!important;-webkit-text-fill-color:#c07a10!important;border:1px solid #f0d8a0}
+.badge-green{background:#e6f9f0;color:#1a8a55!important;-webkit-text-fill-color:#1a8a55!important;border:1px solid #a8e4c8}
+.badge-red{background:#fff0f0;color:#c03030!important;-webkit-text-fill-color:#c03030!important;border:1px solid #f8c8c8}
+.seg-name-wrap{flex:1;min-width:0}
+.seg-name-wrap input{font-weight:600!important;padding:5px 10px!important;border:1.5px solid transparent!important;background:#f0f2f8!important}
+.seg-name-wrap input:hover{border-color:#dde2f0!important;background:#ffffff!important}
+.seg-name-wrap input:focus{border-color:#3a5bd9!important;background:#ffffff!important}
+.btn-remove{background:#fff0f0;border:1px solid #fad4d4;cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#d94040!important;-webkit-text-fill-color:#d94040!important;font-size:15px;font-weight:700;flex-shrink:0;margin-left:auto;font-family:inherit}
+.btn-remove:hover{background:#ffe0e0}
+
+/* RESULTS GRID */
+.results-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.results-grid-2{grid-template-columns:1fr 1fr}
+.results-grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.metric-card{background:#f0f3ff;border-radius:8px;border:1px solid #d0d8f0;padding:14px 16px;text-align:center}
+.metric-label{font-size:10px;font-weight:700;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.metric-value{font-size:22px;font-weight:800;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important}
+.metric-value.warn{color:#c07a10!important;-webkit-text-fill-color:#c07a10!important}
+.metric-unit{font-size:11px;margin-left:2px;font-weight:400;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important}
+
+/* BAR VIS */
+.bar-vis{margin-bottom:8px}
+.bar-label{font-size:11px;color:#5a6a9a!important;-webkit-text-fill-color:#5a6a9a!important;margin-bottom:3px;line-height:1.4}
+.bar-track{height:30px;background:#eef0f8;border-radius:4px;overflow:hidden;display:flex}
+.bar-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;overflow:hidden;color:#fff!important;-webkit-text-fill-color:#fff!important}
+.bar-seg.kerf{background:#a0b4cc}
+.bar-seg.waste{background:#dde3ef;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important}
+.bar-seg.trim{background:#f5a623;opacity:.85}
+
+/* TABLE */
+.table-wrap{border-radius:8px;overflow:hidden;border:1px solid #e2e6f0;margin-bottom:12px}
+.data-table{width:100%;font-size:11px;border-collapse:collapse;background:#fff;table-layout:fixed}
+.data-table th{text-align:left;padding:8px 10px;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #e2e6f0;background:#f8f9fd}
+.data-table td{padding:6px 10px;border-bottom:1px solid #edf0f8;color:#1a2340!important;-webkit-text-fill-color:#1a2340!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.data-table tr:last-child td{border-bottom:none}
+.data-table .total-row td{font-weight:700;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;background:#f0f3ff}
+
+/* BUTTONS */
+.btn-primary{padding:9px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;border:1.5px solid #3a5bd9;background:#3a5bd9!important;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important;transition:all .12s;font-family:inherit}
+.btn-primary:hover{background:#2a4ac0!important;border-color:#2a4ac0!important}
+.btn-outline{padding:9px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;border:1.5px solid #3a5bd9;background:#e8eeff!important;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;transition:all .12s;font-family:inherit}
+.btn-outline:hover{background:#3a5bd9!important;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important}
+.btn-success{padding:9px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;border:1.5px solid #1a8a55;background:#e6f9f0!important;color:#1a8a55!important;-webkit-text-fill-color:#1a8a55!important;transition:all .12s;font-family:inherit}
+.btn-success:hover{background:#1a8a55!important;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important}
+.btn-danger{padding:9px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:700;border:1.5px solid #c03030;background:#fff0f0!important;color:#c03030!important;-webkit-text-fill-color:#c03030!important;transition:all .12s;font-family:inherit}
+.btn-danger:hover{background:#c03030!important;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important}
+.btn-sm{padding:4px 10px!important;font-size:11px!important;border-radius:5px}
+.add-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.add-row button{flex:1}
+
+/* NOTES */
+.info-note{font-size:11px;color:#5a6a9a!important;-webkit-text-fill-color:#5a6a9a!important;background:#f8f9fd;border-radius:6px;padding:8px 12px;margin-top:6px;border:1px solid #e2e6f0}
+.warning-note{font-size:11px;padding:8px 12px;border-radius:6px;margin-top:8px;background:#fffbec;color:#9a6a00!important;-webkit-text-fill-color:#9a6a00!important;border:1px solid #f0d890}
+.error-note{font-size:11px;padding:8px 12px;border-radius:6px;margin-top:8px;background:#fff0f0;color:#c03030!important;-webkit-text-fill-color:#c03030!important;border:1px solid #f8c8c8}
+.success-note{font-size:11px;padding:8px 12px;border-radius:6px;margin-top:8px;background:#e6f9f0;color:#1a8a55!important;-webkit-text-fill-color:#1a8a55!important;border:1px solid #a8e4c8}
+
+/* HELP PANEL */
+.help-panel{background:#f8f9fd;border-radius:10px;border:1px solid #e2e6f0;margin-bottom:14px;overflow:hidden}
+.help-toggle{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;user-select:none}
+.help-toggle:hover{background:#f0f2f8}
+.help-toggle-left{font-size:11px;font-weight:700;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;text-transform:uppercase;letter-spacing:.08em}
+.help-icon{font-size:13px;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;transition:transform .25s}
+.help-icon.open{transform:rotate(180deg)}
+.help-body{padding:0 1.1rem 1.1rem;display:flex;gap:1.25rem;flex-wrap:wrap}
+.help-text{flex:1;min-width:200px}
+.help-text h4{font-size:10px;font-weight:700;color:#1a2340!important;-webkit-text-fill-color:#1a2340!important;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;margin-top:.75rem}
+.help-text ol,.help-text ul{padding-left:1.1rem;font-size:12px;color:#5a6a9a!important;-webkit-text-fill-color:#5a6a9a!important;line-height:1.9}
+.help-diag{flex:0 0 auto;padding-top:.5rem}
+
+/* SECTION CARD */
+.section-card{background:#f8f9fd;border-radius:10px;border:1px solid #e2e6f0;border-left-width:4px;padding:1rem 1.1rem;margin-bottom:12px}
+.section-header-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.section-num-badge{border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important}
+.section-name-field{flex:1;min-width:100px}
+.section-name-field input{font-weight:600!important;padding:5px 10px!important;border:1.5px solid transparent!important;background:#f0f2f8!important}
+.section-name-field input:hover{border-color:#dde2f0!important;background:#ffffff!important}
+.section-name-field input:focus{border-color:#3a5bd9!important;background:#ffffff!important}
+
+/* SPACING TOGGLE */
+.spacing-toggle{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.spacing-opt{flex:1;min-width:120px;padding:7px;border:1.5px solid #dde2f0;border-radius:6px;background:#ffffff!important;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;cursor:pointer;font-size:11px;font-weight:700;text-align:center;transition:all .2s;font-family:inherit}
+.spacing-opt.active{background:#3a5bd9!important;color:#ffffff!important;-webkit-text-fill-color:#ffffff!important;border-color:#3a5bd9}
+
+/* GAP TYPE CARDS */
+.gap-type-cards{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;margin-bottom:8px}
+.gap-type-card{flex:1;min-width:140px;padding:10px 14px;border:1.5px solid #dde2f0;border-radius:8px;background:#ffffff!important;cursor:pointer;transition:all .2s;text-align:left;font-family:inherit}
+.gap-type-card:hover{border-color:#3a5bd9;background:#eef1ff!important}
+.gap-type-card.active{border-color:#3a5bd9;background:#e8eeff!important}
+.gtc-icon{font-size:16px;margin-bottom:4px;display:block;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important}
+.gtc-title{font-size:12px;font-weight:700;color:#1a2340!important;-webkit-text-fill-color:#1a2340!important;display:block;margin-bottom:2px}
+.gtc-sub{font-size:10px;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important;display:block;line-height:1.4}
+.gap-type-card.active .gtc-sub{color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important}
+
+/* SECTION RESULT */
+.section-result{background:#ffffff;border-radius:8px;border:1px solid #e2e6f0;padding:.75rem 1rem;margin-top:.75rem}
+.sr-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #edf0f8;flex-wrap:wrap;gap:4px}
+.sr-row:last-child{border-bottom:none;font-weight:700}
+.sr-label{font-size:11px;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important}
+.sr-val{font-size:11px;font-weight:700;color:#1a2340!important;-webkit-text-fill-color:#1a2340!important}
+.sr-val.ok{color:#1a8a55!important;-webkit-text-fill-color:#1a8a55!important}
+.sr-val.warn{color:#c07a10!important;-webkit-text-fill-color:#c07a10!important}
+.feed-badge{display:inline-block;background:#e6f9f0;color:#1a8a55!important;-webkit-text-fill-color:#1a8a55!important;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:6px;border:1px solid #a8e4c8}
+
+/* COLLATE */
+.collate-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;color:#5a6a9a!important;-webkit-text-fill-color:#5a6a9a!important;cursor:pointer;user-select:none}
+.collate-row input{width:15px;height:15px;cursor:pointer;accent-color:#3a5bd9;flex-shrink:0}
+.group-badge{display:inline-block;background:#e8eeff;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;margin-left:4px;border:1px solid #c8d4f8}
+
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:.75rem}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#5a6a9a!important;-webkit-text-fill-color:#5a6a9a!important}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* PRESET ROW */
+.preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.preset-btn{padding:4px 12px;border:1.5px solid #dde2f0;border-radius:20px;font-size:11px;font-weight:700;background:#ffffff!important;color:#5a6a9a!important;-webkit-text-fill-color:#5a6a9a!important;cursor:pointer;transition:all .2s;font-family:inherit}
+.preset-btn:hover{background:#e8eeff!important;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;border-color:#3a5bd9}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid #e2e6f0;margin:12px 0}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.hidden{display:none}
+
+/* PROJECT GRID */
+.project-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.project-grid{grid-template-columns:1fr}.field-row,.field-row-3{grid-template-columns:1fr}.results-grid,.results-grid-2,.results-grid-4{grid-template-columns:1fr 1fr}}
+
+/* ROT BTN */
+.rot-btn{width:32px;height:28px;border-radius:6px;border:1.5px solid #dde2f0;background:#ffffff!important;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center;transition:all .2s}
+.rot-btn.free{background:#e6f9f0!important;border-color:#a8e4c8;color:#1a8a55!important;-webkit-text-fill-color:#1a8a55!important}
+.rot-btn.locked{background:#fff5e0!important;border-color:#f0d8a0;color:#c07a10!important;-webkit-text-fill-color:#c07a10!important}
+
+/* TIP */
+.tip-algo{background:#f0f3ff;border-left:3px solid #3a5bd9;border-radius:0 6px 6px 0;padding:8px 12px;font-size:11px;color:#3a5bd9!important;-webkit-text-fill-color:#3a5bd9!important;margin-top:.75rem;line-height:1.5}
+
+/* FOOTER */
+.app-footer{text-align:center;font-size:11px;color:#8896c8!important;-webkit-text-fill-color:#8896c8!important;padding-top:12px;margin-top:4px}
+
+@media print{body{background:#fff}.no-print{display:none!important}.flat-card{border:1px solid #ccc;break-inside:avoid}.app-header{background:#1e2e6e!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.metric-card{background:#f0f3ff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.bar-track{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="header-left">
+    <canvas id="catLogo" class="cat-logo" width="52" height="52"></canvas>
+    <div>
+      <div class="header-brand">CATstimate</div>
+      <div class="header-subtitle">Cutting List Calculator</div>
+      <div class="header-author">by N.Calatrava</div>
+    </div>
+  </div>
+  <span class="header-version">v1.1 · May 2026</span>
+</header>
+
+<!-- PROJECT -->
+<div class="flat-card no-print">
+  <div class="section-title">Project details</div>
+  <div class="project-grid">
+    <div class="field"><label>Project name</label><input type="text" id="proj-name" placeholder="e.g. Mango Street Residence"></div>
+    <div class="field"><label>Client / contractor</label><input type="text" id="proj-client" placeholder="e.g. Santos Construction"></div>
+    <div class="field"><label>Prepared by</label><input type="text" id="proj-by" value="N.Calatrava"></div>
+    <div class="field"><label>Notes</label><input type="text" id="proj-notes" placeholder="Optional notes or revision remarks"></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="mode-tabs no-print">
+  <div class="tab active" id="tab-linear">⎯ Linear cuts</div>
+  <div class="tab" id="tab-baluster">⍁ Baluster spacing</div>
+  <div class="tab" id="tab-sheet">⬛ Sheet / panel cuts</div>
+</div>
+
+<!-- ===== LINEAR ===== -->
+<div id="mode-linear">
+  <div class="help-panel no-print">
+    <div class="help-toggle" id="htog-linear">
+      <span class="help-toggle-left">ℹ How to use — Linear cuts</span>
+      <span class="help-icon open" id="icon-linear">▼</span>
+    </div>
+    <div id="help-linear" class="help-body">
+      <div class="help-text">
+        <h4>What it does</h4>
+        <ol>
+          <li>Enter your <strong>stock bar length</strong> — the full length of each bar, rod, or pipe you are buying.</li>
+          <li>Set a <strong>lead trim</strong> if you always make a fresh cut at the start of each bar (e.g. 5–10mm).</li>
+          <li>Set the <strong>kerf</strong> — the width of material lost per saw cut (typically 2–4mm).</li>
+          <li>Add each cut piece — description, length, and quantity.</li>
+          <li>Click <strong>Calculate</strong>. The optimiser fits pieces onto the fewest bars, longest first.</li>
+          <li>Toggle <strong>Collate identical bars</strong> to group matching cut patterns.</li>
+        </ol>
+        <div class="info-note">💡 Waste % turning amber means over 20% waste — try adjusting your stock length.</div>
+      </div>
+      <div class="help-diag">
+        <svg width="280" height="130" viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="36" width="260" height="34" rx="4" fill="#dde3ef"/>
+          <rect x="10" y="36" width="16" height="34" rx="3" fill="#f5a623" opacity=".85"/>
+          <text x="18" y="57" text-anchor="middle" font-size="7" fill="#fff" font-family="Segoe UI,sans-serif" font-weight="700">TRIM</text>
+          <rect x="29" y="36" width="68" height="34" rx="2" fill="#3a5bd9"/>
+          <text x="63" y="57" text-anchor="middle" font-size="10" fill="#fff" font-family="Segoe UI,sans-serif" font-weight="700">900</text>
+          <rect x="97" y="36" width="5" height="34" fill="#a0b4cc"/>
+          <rect x="102" y="36" width="56" height="34" rx="2" fill="#2d5ba8"/>
+          <text x="130" y="57" text-anchor="middle" font-size="10" fill="#fff" font-family="Segoe UI,sans-serif" font-weight="700">700</text>
+          <rect x="158" y="36" width="5" height="34" fill="#a0b4cc"/>
+          <rect x="163" y="36" width="48" height="34" rx="2" fill="#1a3a7a"/>
+          <text x="187" y="57" text-anchor="middle" font-size="10" fill="#fff" font-family="Segoe UI,sans-serif" font-weight="700">600</text>
+          <rect x="211" y="36" width="5" height="34" fill="#a0b4cc"/>
+          <rect x="216" y="36" width="54" height="34" rx="2" fill="#eef0f8"/>
+          <text x="243" y="54" text-anchor="middle" font-size="9" fill="#8896c8" font-family="Segoe UI,sans-serif">waste</text>
+          <text x="10" y="28" font-size="9" fill="#5a6a9a" font-family="Segoe UI,sans-serif" font-weight="700">Stock bar: 6000mm</text>
+          <rect x="10" y="100" width="9" height="9" rx="2" fill="#3a5bd9"/><text x="23" y="108" font-size="9" fill="#5a6a9a" font-family="Segoe UI,sans-serif">Cut piece</text>
+          <rect x="90" y="100" width="9" height="9" rx="2" fill="#a0b4cc"/><text x="103" y="108" font-size="9" fill="#5a6a9a" font-family="Segoe UI,sans-serif">Kerf</text>
+          <rect x="140" y="100" width="9" height="9" rx="2" fill="#f5a623" opacity=".85"/><text x="153" y="108" font-size="9" fill="#5a6a9a" font-family="Segoe UI,sans-serif">Lead trim</text>
+          <rect x="215" y="100" width="9" height="9" rx="2" fill="#eef0f8" stroke="#dde2f0"/><text x="228" y="108" font-size="9" fill="#5a6a9a" font-family="Segoe UI,sans-serif">Waste</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="flat-card no-print">
+    <div class="section-title">Stock settings</div>
+    <div class="field-row-1"><div class="field"><label>Units</label>
+      <select id="unit-linear"><option value="mm">Millimetres (mm)</option><option value="m">Metres (m)</option><option value="ft">Feet (ft)</option><option value="in">Inches (in)</option></select>
+    </div></div>
+    <div class="field-row">
+      <div class="field"><label>Stock / bar length <span id="lbl-su" style="color:#3a5bd9;font-weight:700">mm</span></label><input type="number" id="stock-len" value="6000" min="1"></div>
+      <div class="field"><label>Lead trim <span id="lbl-tu" style="color:#3a5bd9;font-weight:700">mm</span></label><input type="number" id="lead-trim" value="0" min="0" step="0.5"></div>
+    </div>
+    <div class="field-row-1"><div class="field"><label>Kerf / blade width <span id="lbl-ku" style="color:#3a5bd9;font-weight:700">mm</span></label><input type="number" id="kerf" value="3" min="0" step="0.5"></div></div>
+    <div class="section-title" style="margin-top:4px">Presets</div>
+    <div class="preset-row" id="presets-linear"></div>
+  </div>
+
+  <div class="flat-card no-print">
+    <div class="section-header">
+      <div class="section-title" style="margin-bottom:0">Cut list</div>
+      <span class="pill-count" id="lin-count">0 cuts</span>
+    </div>
+    <table class="data-table" style="margin-bottom:0">
+      <thead><tr><th style="width:38%">Description</th><th style="width:24%">Length</th><th style="width:14%">Qty</th><th></th></tr></thead>
+      <tbody id="linear-tbody"></tbody>
+    </table>
+    <div class="add-row" style="margin-top:12px">
+      <button class="btn-outline" id="btn-add-linear">+ Add cut</button>
+      <button class="btn-success" id="btn-calc-linear">✓ Calculate</button>
+    </div>
+  </div>
+
+  <div id="linear-warn"></div>
+
+  <div class="flat-card" id="linear-results" style="display:none">
+    <div class="section-title">Results</div>
+    <label class="collate-row no-print"><input type="checkbox" id="collate-toggle" checked> Collate identical bars into groups</label>
+    <div class="results-grid" id="linear-metrics"></div>
+    <div id="linear-bars"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#3a5bd9"></div>Cut piece</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#a0b4cc"></div>Kerf</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f5a623;opacity:.85"></div>Lead trim</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dde3ef"></div>Waste / offcut</div>
+    </div>
+    <div class="tip-algo">ℹ First-fit decreasing (FFD) — longest pieces placed first to minimise bar count.</div>
+  </div>
+  <div class="actions no-print" id="linear-actions" style="display:none">
+    <button class="btn-primary" id="btn-dl-linear">↓ Download report</button>
+    <button class="btn-outline" id="btn-print-linear">⎙ Print</button>
+    <button class="btn-danger" id="btn-clear-linear">✕ Clear all</button>
+  </div>
+</div>
+
+<!-- ===== BALUSTER ===== -->
+<div id="mode-baluster" class="hidden">
+  <div class="help-panel no-print">
+    <div class="help-toggle" id="htog-baluster">
+      <span class="help-toggle-left">ℹ How to use — Baluster spacing</span>
+      <span class="help-icon open" id="icon-baluster">▼</span>
+    </div>
+    <div id="help-baluster" class="help-body">
+      <div class="help-text">
+        <h4>What it does</h4>
+        <ol>
+          <li>Set your <strong>stock bar length</strong>, lead trim, and kerf.</li>
+          <li>Choose whether your gap inputs are <strong>clear (face to face)</strong> or <strong>centre to centre</strong>.</li>
+          <li>Add one <strong>section</strong> per continuous balustrade run (e.g. Stair 1, Landing, Stair 2).</li>
+          <li>Enter the <strong>run length</strong>, <strong>baluster width</strong>, <strong>recommended gap</strong>, <strong>max gap</strong>, and <strong>cut length</strong>.</li>
+          <li>The calculator finds the number of balusters keeping the gap as close to recommended as possible without exceeding the max.</li>
+          <li>All sections combine into one cut optimiser across your stock bars.</li>
+        </ol>
+        <div class="info-note">💡 AS 1657 and NCC Section B specify a maximum clear gap of 125mm for residential balustrades. Confirm with your certifier.</div>
+      </div>
+      <div class="help-diag">
+        <svg width="280" height="165" viewBox="0 0 280 165" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="48" width="15" height="66" rx="2" fill="#1e2e6e"/>
+          <rect x="255" y="48" width="15" height="66" rx="2" fill="#1e2e6e"/>
+          <text x="17" y="43" text-anchor="middle" font-size="8" fill="#1a2340" font-family="Segoe UI,sans-serif" font-weight="700">POST</text>
+          <text x="262" y="43" text-anchor="middle" font-size="8" fill="#1a2340" font-family="Segoe UI,sans-serif" font-weight="700">POST</text>
+          <rect x="10" y="48" width="260" height="8" rx="2" fill="#3a5bd9" opacity=".35"/>
+          <rect x="44" y="56" width="13" height="58" rx="2" fill="#3a5bd9"/>
+          <rect x="92" y="56" width="13" height="58" rx="2" fill="#3a5bd9"/>
+          <rect x="140" y="56" width="13" height="58" rx="2" fill="#3a5bd9"/>
+          <rect x="188" y="56" width="13" height="58" rx="2" fill="#3a5bd9"/>
+          <rect x="10" y="106" width="260" height="8" rx="2" fill="#3a5bd9" opacity=".35"/>
+          <line x1="25" y1="132" x2="44" y2="132" stroke="#c07a10" stroke-width="1.5"/>
+          <line x1="25" y1="128" x2="25" y2="136" stroke="#c07a10" stroke-width="1.5"/>
+          <line x1="44" y1="128" x2="44" y2="136" stroke="#c07a10" stroke-width="1.5"/>
+          <text x="34" y="145" text-anchor="middle" font-size="8" fill="#c07a10" font-family="Segoe UI,sans-serif">margin</text>
+          <line x1="57" y1="132" x2="92" y2="132" stroke="#1a8a55" stroke-width="1.5"/>
+          <line x1="57" y1="128" x2="57" y2="136" stroke="#1a8a55" stroke-width="1.5"/>
+          <line x1="92" y1="128" x2="92" y2="136" stroke="#1a8a55" stroke-width="1.5"/>
+          <text x="74" y="145" text-anchor="middle" font-size="8" fill="#1a8a55" font-family="Segoe UI,sans-serif">clear gap</text>
+          <line x1="50" y1="157" x2="98" y2="157" stroke="#3a5bd9" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <line x1="50" y1="153" x2="50" y2="161" stroke="#3a5bd9" stroke-width="1.5"/>
+          <line x1="98" y1="153" x2="98" y2="161" stroke="#3a5bd9" stroke-width="1.5"/>
+          <text x="74" y="165" text-anchor="middle" font-size="8" fill="#3a5bd9" font-family="Segoe UI,sans-serif">c-to-c pitch</text>
+          <line x1="10" y1="120" x2="255" y2="120" stroke="#8896c8" stroke-width="1" stroke-dasharray="4,2"/>
+          <text x="132" y="118" text-anchor="middle" font-size="8" fill="#8896c8" font-family="Segoe UI,sans-serif">total run length</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="flat-card no-print">
+    <div class="section-title">Stock settings — baluster cuts</div>
+    <div class="field-row-1"><div class="field"><label>Units</label>
+      <select id="unit-baluster"><option value="mm">Millimetres (mm)</option><option value="m">Metres (m)</option><option value="ft">Feet (ft)</option><option value="in">Inches (in)</option></select>
+    </div></div>
+    <div class="field-row">
+      <div class="field"><label>Stock / bar length <span id="lbl-bsu" style="color:#3a5bd9;font-weight:700">mm</span></label><input type="number" id="b-stock-len" value="6000" min="1"></div>
+      <div class="field"><label>Lead trim <span id="lbl-btu" style="color:#3a5bd9;font-weight:700">mm</span></label><input type="number" id="b-lead-trim" value="0" min="0" step="0.5"></div>
+    </div>
+    <div class="field-row-1"><div class="field"><label>Kerf / blade width <span id="lbl-bku" style="color:#3a5bd9;font-weight:700">mm</span></label><input type="number" id="b-kerf" value="3" min="0" step="0.5"></div></div>
+    <hr class="divider">
+    <div class="section-title" style="margin-bottom:8px">Gap input type</div>
+    <div class="gap-type-cards">
+      <button class="gap-type-card active" id="gtog-clear">
+        <span class="gtc-icon">↔</span>
+        <span class="gtc-title">Clear gap</span>
+        <span class="gtc-sub">Face to face — the open space between two balusters</span>
+      </button>
+      <button class="gap-type-card" id="gtog-ctc">
+        <span class="gtc-icon">·—·</span>
+        <span class="gtc-title">Centre to centre</span>
+        <span class="gtc-sub">Centreline to centreline of each baluster</span>
+      </button>
+    </div>
+    <div class="info-note" id="gap-toggle-hint">Recommended and max gap values are measured face to face (clear opening)</div>
+    <div class="section-title" style="margin-top:12px">Presets</div>
+    <div class="preset-row" id="presets-baluster"></div>
+  </div>
+
+  <div id="baluster-sections"></div>
+
+  <div class="add-row no-print" style="margin-bottom:14px">
+    <button class="btn-outline" id="btn-add-section">+ Add section</button>
+    <button class="btn-success" id="btn-calc-baluster">✓ Calculate all sections</button>
+  </div>
+
+  <div id="baluster-warn"></div>
+
+  <div class="flat-card" id="baluster-results" style="display:none">
+    <div class="section-title">Combined cut optimiser</div>
+    <label class="collate-row no-print"><input type="checkbox" id="b-collate-toggle" checked> Collate identical bars into groups</label>
+    <div class="results-grid" id="baluster-metrics"></div>
+    <div id="baluster-bars"></div>
+    <div class="legend" id="baluster-legend"></div>
+    <div class="tip-algo">ℹ All sections combined and optimised together. Each section is colour-coded on the bar diagram.</div>
+  </div>
+  <div class="actions no-print" id="baluster-actions" style="display:none">
+    <button class="btn-primary" id="btn-dl-baluster">↓ Download report</button>
+    <button class="btn-outline" id="btn-print-baluster">⎙ Print</button>
+    <button class="btn-danger" id="btn-clear-baluster">✕ Clear all sections</button>
+  </div>
+</div>
+
+<!-- ===== SHEET ===== -->
+<div id="mode-sheet" class="hidden">
+  <div class="help-panel no-print">
+    <div class="help-toggle" id="htog-sheet">
+      <span class="help-toggle-left">ℹ How to use — Sheet / panel cuts</span>
+      <span class="help-icon open" id="icon-sheet">▼</span>
+    </div>
+    <div id="help-sheet" class="help-body">
+      <div class="help-text">
+        <h4>What it does</h4>
+        <ol>
+          <li>Enter your <strong>sheet size</strong> (width × height) and kerf.</li>
+          <li>Add each <strong>panel</strong> — description, width, height, and quantity.</li>
+          <li>Set <strong>rotation</strong> per panel: <span style="color:#1a8a55;font-weight:700">Free ↻</span> allows 90° rotation to improve fit. <span style="color:#c07a10;font-weight:700">Locked 🔒</span> keeps orientation fixed — use for timber grain, brushed metal, or patterned surfaces.</li>
+          <li>Click <strong>Calculate</strong>. Panels are nested using guillotine bin packing.</li>
+        </ol>
+        <div class="info-note">🔒 Always lock rotation for materials with a visible grain, texture direction, or repeating pattern.</div>
+      </div>
+      <div class="help-diag">
+        <svg width="240" height="170" viewBox="0 0 240 170" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="170" height="150" rx="4" fill="#eef0f8" stroke="#dde2f0" stroke-width="1.5"/>
+          <rect x="12" y="12" width="80" height="70" rx="2" fill="#3a5bd9" stroke="#2a4ac0" stroke-width="1.5"/>
+          <text x="52" y="46" text-anchor="middle" font-size="9" fill="#fff" font-family="Segoe UI,sans-serif" font-weight="700">Panel A</text>
+          <text x="52" y="58" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)" font-family="Segoe UI,sans-serif">600×450</text>
+          <rect x="95" y="12" width="50" height="70" rx="2" fill="#1a8a55" stroke="#1a8a55" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <text x="120" y="46" text-anchor="middle" font-size="9" fill="#fff" font-family="Segoe UI,sans-serif" font-weight="700">Panel B</text>
+          <text x="120" y="58" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.85)" font-family="Segoe UI,sans-serif">↻ rotated</text>
+          <rect x="12" y="85" width="80" height="50" rx="2" fill="#2d5ba8" stroke="#2a4ac0" stroke-width="1.5"/>
+          <text x="52" y="113" text-anchor="middle" font-size="9" fill="#fff" font-family="Segoe UI,sans-serif" font-weight="700">Panel C</text>
+          <rect x="12" y="138" width="80" height="20" rx="2" fill="#1a3a7a" stroke="#2a4ac0" stroke-width="1.5"/>
+          <text x="52" y="150" text-anchor="middle" font-size="8" fill="#fff" font-family="Segoe UI,sans-serif" font-weight="700">Panel D</text>
+          <rect x="95" y="85" width="83" height="73" rx="2" fill="none" stroke="#dde2f0" stroke-dasharray="3,3"/>
+          <text x="136" y="124" text-anchor="middle" font-size="9" fill="#8896c8" font-family="Segoe UI,sans-serif">waste</text>
+          <line x1="93" y1="10" x2="93" y2="160" stroke="#a0b4cc" stroke-width="2"/>
+          <line x1="10" y1="83" x2="180" y2="83" stroke="#a0b4cc" stroke-width="2"/>
+          <line x1="10" y1="136" x2="93" y2="136" stroke="#a0b4cc" stroke-width="2"/>
+          <rect x="192" y="18" width="9" height="9" rx="2" fill="#3a5bd9"/><text x="205" y="26" font-size="8" fill="#5a6a9a" font-family="Segoe UI,sans-serif">Normal</text>
+          <rect x="192" y="34" width="9" height="9" rx="2" fill="#1a8a55" stroke="#1a8a55" stroke-dasharray="3,2"/><text x="205" y="42" font-size="8" fill="#5a6a9a" font-family="Segoe UI,sans-serif">Rotated</text>
+          <rect x="192" y="50" width="9" height="9" rx="2" fill="#a0b4cc"/><text x="205" y="58" font-size="8" fill="#5a6a9a" font-family="Segoe UI,sans-serif">Kerf</text>
+          <rect x="192" y="66" width="9" height="9" rx="2" fill="#eef0f8" stroke="#dde2f0"/><text x="205" y="74" font-size="8" fill="#5a6a9a" font-family="Segoe UI,sans-serif">Waste</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="flat-card no-print">
+    <div class="section-title">Sheet settings</div>
+    <div class="field-row-1"><div class="field"><label>Units</label>
+      <select id="unit-sheet"><option value="mm">Millimetres (mm)</option><option value="m">Metres (m)</option><option value="ft">Feet (ft)</option><option value="in">Inches (in)</option></select>
+    </div></div>
+    <div class="section-title" style="margin-top:4px">Presets</div>
+    <div class="preset-row" id="presets-sheet"></div>
+    <div class="field-row-3">
+      <div class="field"><label>Sheet width <span id="lbl-swu" style="color:#3a5bd9;font-weight:700">mm</span></label><input type="number" id="sheet-w" value="1200" min="1"></div>
+      <div class="field"><label>Sheet height <span id="lbl-shu" style="color:#3a5bd9;font-weight:700">mm</span></label><input type="number" id="sheet-h" value="2400" min="1"></div>
+      <div class="field"><label>Kerf <span id="lbl-sku" style="color:#3a5bd9;font-weight:700">mm</span></label><input type="number" id="sheet-kerf" value="3" min="0" step="0.5"></div>
+    </div>
+  </div>
+
+  <div class="flat-card no-print">
+    <div class="section-header">
+      <div class="section-title" style="margin-bottom:0">Panel cut list</div>
+      <span class="pill-count" id="sht-count">0 panels</span>
+    </div>
+    <table class="data-table" style="margin-bottom:0">
+      <thead><tr><th style="width:26%">Description</th><th style="width:13%">Width</th><th style="width:13%">Height</th><th style="width:9%">Qty</th><th style="width:22%">Rotation</th><th></th></tr></thead>
+      <tbody id="sheet-tbody"></tbody>
+    </table>
+    <div class="add-row" style="margin-top:12px">
+      <button class="btn-outline" id="btn-add-sheet">+ Add panel</button>
+      <button class="btn-success" id="btn-calc-sheet">✓ Calculate</button>
+    </div>
+    <div class="info-note" style="margin-top:10px">🔒 Lock rotation for panels with grain or pattern direction.</div>
+  </div>
+
+  <div id="sheet-warn"></div>
+
+  <div class="flat-card" id="sheet-results" style="display:none">
+    <div class="section-title">Results</div>
+    <div class="results-grid" id="sheet-metrics"></div>
+    <div id="sheet-vis"></div>
+    <div class="legend" style="margin-top:.75rem">
+      <div class="legend-item"><div class="legend-dot" style="background:#3a5bd9;border:1.5px solid #2a4ac0"></div>Original orientation</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#1a8a55;border:1.5px dashed #1a8a55"></div>Rotated 90°</div>
+    </div>
+    <div class="tip-algo">ℹ Guillotine bin packing — matches actual panel saw / table saw cutting practice. Rotation-aware where allowed.</div>
+  </div>
+  <div class="actions no-print" id="sheet-actions" style="display:none">
+    <button class="btn-primary" id="btn-dl-sheet">↓ Download report</button>
+    <button class="btn-outline" id="btn-print-sheet">⎙ Print</button>
+    <button class="btn-danger" id="btn-clear-sheet">✕ Clear all</button>
+  </div>
+</div>
+
+<footer class="app-footer">CATstimate v1.1 · May 2026 · by N.Calatrava · Free to use · No internet required</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+const VERSION='1.1',VD='May 2026';
+const SC=['#3a5bd9','#c07a10','#1a8a55','#8e44ad','#c03030','#16a085','#d4ac0d','#2980b9'];
+const linPresets={mm:[3000,6000,7500,9000,12000],m:[3,6,7.5,9,12],ft:[10,20,24,30,40],in:[120,240,288,360,480]};
+const shtPresets={mm:[{w:1200,h:2400,l:'1200×2400'},{w:1220,h:2440,l:'4×8 ft'},{w:1500,h:3000,l:'1500×3000'},{w:2000,h:1000,l:'2000×1000'}],m:[{w:1.2,h:2.4,l:'1.2×2.4'},{w:1.5,h:3.0,l:'1.5×3.0'}],ft:[{w:4,h:8,l:'4×8'},{w:4,h:10,l:'4×10'}],in:[{w:48,h:96,l:'48×96'},{w:48,h:120,l:'48×120'}]};
+
+let linRows=[],sheetRows=[],balSections=[],gapMode='clear';
+function $(id){return document.getElementById(id)}
+function gLU(){return $('unit-linear').value}
+function gBU(){return $('unit-baluster').value}
+function gSU(){return $('unit-sheet').value}
+
+// Draw cat logo on canvas
+(function(){
+  const c=$('catLogo'),x=c.getContext('2d');
+  x.fillStyle='#1e2e6e';x.beginPath();x.roundRect(0,0,52,52,10);x.fill();
+  x.fillStyle='#e8a87c';x.beginPath();x.ellipse(26,20,14,10,0,0,Math.PI*2);x.fill();
+  x.fillStyle='#e8a87c';
+  [[12,8],[40,8]].forEach(([px,py])=>{x.beginPath();x.moveTo(px,py+8);x.lineTo(px-5,py-4);x.lineTo(px+5,py-4);x.closePath();x.fill()});
+  x.fillStyle='#ffffff';x.beginPath();x.ellipse(26,34,14,12,0,0,Math.PI*2);x.fill();
+  x.fillStyle='#1e2e6e';
+  [[18,30,4,2],[28,30,4,2],[22,36,8,1.5]].forEach(([a,b,w,h])=>{x.fillRect(a,b,w,h)});
+  // ruler tick marks along bottom
+  x.strokeStyle='#c87a45';x.lineWidth=0.8;
+  for(let i=10;i<=42;i+=4){x.beginPath();x.moveTo(i,45);x.lineTo(i,i%8===2?40:43);x.stroke()}
+})();
+
+// Mode switch
+['linear','baluster','sheet'].forEach(t=>{
+  $(('tab-'+t)).addEventListener('click',()=>{
+    ['linear','baluster','sheet'].forEach(m=>{
+      $('tab-'+m).className='tab'+(m===t?' active':'');
+      $('mode-'+m).style.display=m===t?'block':'none';
+    });
+  });
+});
+
+// Help toggles
+['linear','baluster','sheet'].forEach(id=>{
+  const tog=$('htog-'+id),panel=$('help-'+id),icon=$('icon-'+id);
+  if(tog&&panel)tog.addEventListener('click',()=>{
+    const open=panel.style.display!=='none';
+    panel.style.display=open?'none':'flex';
+    if(icon)icon.className='help-icon'+(open?'':' open');
+  });
+});
+
+// Gap toggle
+$('gtog-clear').addEventListener('click',()=>applyGapMode('clear'));
+$('gtog-ctc').addEventListener('click',()=>applyGapMode('ctc'));
+function applyGapMode(mode){
+  gapMode=mode;
+  $('gtog-clear').className='gap-type-card'+(mode==='clear'?' active':'');
+  $('gtog-ctc').className='gap-type-card'+(mode==='ctc'?' active':'');
+  $('gap-toggle-hint').textContent=mode==='clear'
+    ?'Recommended and max gap values are measured face to face (clear opening)'
+    :'Recommended and max gap values are measured centre to centre (includes one baluster width)';
+  document.querySelectorAll('.gap-label-rec').forEach(e=>e.textContent=mode==='clear'?'Recommended clear gap':'Recommended C-to-C gap');
+  document.querySelectorAll('.gap-label-max').forEach(e=>e.textContent=mode==='clear'?'Max clear gap':'Max C-to-C gap');
+  calcBaluster();
+}
+
+// Unit tags
+function setUnitEls(ids,u){ids.forEach(id=>{const e=$(id);if(e)e.textContent=u})}
+function updateLinUnits(){const u=gLU();setUnitEls(['lbl-su','lbl-tu','lbl-ku'],u);rebuildLinPresets()}
+function updateBalUnits(){const u=gBU();setUnitEls(['lbl-bsu','lbl-btu','lbl-bku'],u);document.querySelectorAll('.b-unit-tag').forEach(e=>e.textContent=u);rebuildBalPresets()}
+function updateShtUnits(){const u=gSU();setUnitEls(['lbl-swu','lbl-shu','lbl-sku'],u);document.querySelectorAll('.s-unit-tag').forEach(e=>e.textContent=u);rebuildShtPresets()}
+$('unit-linear').addEventListener('change',updateLinUnits);
+$('unit-baluster').addEventListener('change',updateBalUnits);
+$('unit-sheet').addEventListener('change',updateShtUnits);
+
+function uid(){return Math.random().toString(36).slice(2,7)}
+
+function rebuildLinPresets(){const u=gLU(),c=$('presets-linear');c.innerHTML='';(linPresets[u]||[]).forEach(v=>{const b=document.createElement('button');b.className='preset-btn';b.textContent=v+' '+u;b.addEventListener('click',()=>{$('stock-len').value=v;calcLinear()});c.appendChild(b)})}
+function rebuildBalPresets(){const u=gBU(),c=$('presets-baluster');c.innerHTML='';(linPresets[u]||[]).forEach(v=>{const b=document.createElement('button');b.className='preset-btn';b.textContent=v+' '+u;b.addEventListener('click',()=>{$('b-stock-len').value=v;calcBaluster()});c.appendChild(b)})}
+function rebuildShtPresets(){const u=gSU(),c=$('presets-sheet');c.innerHTML='';(shtPresets[u]||[]).forEach(p=>{const b=document.createElement('button');b.className='preset-btn';b.textContent=p.l;b.addEventListener('click',()=>{$('sheet-w').value=p.w;$('sheet-h').value=p.h;calcSheet()});c.appendChild(b)})}
+
+function buildGroupLabel(idxs){const n=idxs.map(i=>i+1);if(n.length===2)return`Bar ${n[0]} & ${n[1]} `;if(n[n.length-1]-n[0]===n.length-1)return`Bar ${n[0]}–${n[n.length-1]} `;return'Bar '+n.join(', ')+' '}
+
+// ====== LINEAR ======
+$('btn-add-linear').addEventListener('click',addLinRow);
+$('btn-calc-linear').addEventListener('click',calcLinear);
+$('btn-clear-linear').addEventListener('click',()=>{if(confirm('Clear all cuts?')){linRows=[];$('linear-tbody').innerHTML='';$('linear-results').style.display='none';$('linear-actions').style.display='none';$('linear-warn').innerHTML='';$('lin-count').textContent='0 cuts'}});
+$('btn-print-linear').addEventListener('click',()=>window.print());
+$('btn-dl-linear').addEventListener('click',()=>dlReport('linear'));
+$('collate-toggle').addEventListener('change',calcLinear);
+['stock-len','lead-trim','kerf'].forEach(id=>$(id).addEventListener('input',calcLinear));
+
+function addLinRow(){linRows.push({id:uid(),desc:'',len:100,qty:1});buildLinRow(linRows.length-1);updateLinCount()}
+function removeLinRow(id){linRows=linRows.filter(r=>r.id!==id);$('linear-tbody').innerHTML='';linRows.forEach((_,i)=>buildLinRow(i));updateLinCount();calcLinear()}
+function updateLinCount(){$('lin-count').textContent=linRows.reduce((s,r)=>s+r.qty,0)+' cuts'}
+function buildLinRow(i){
+  const r=linRows[i],u=gLU(),tr=document.createElement('tr');tr.id='lrow-'+r.id;
+  tr.innerHTML=`<td><input type="text" id="ldesc-${r.id}" value="${r.desc}" placeholder="Description" style="width:100%;padding:5px 8px!important;font-size:12px!important"></td>
+  <td><div style="display:flex;align-items:center;gap:3px"><input type="number" id="llen-${r.id}" value="${r.len}" min="1" style="width:100%;padding:5px 8px!important;font-size:12px!important"><span class="b-unit-tag" style="font-size:10px;color:#3a5bd9;font-weight:700;white-space:nowrap;flex-shrink:0">${u}</span></div></td>
+  <td><input type="number" id="lqty-${r.id}" value="${r.qty}" min="1" style="width:100%;padding:5px 8px!important;font-size:12px!important"></td>
+  <td><button class="btn-danger btn-sm" id="lrm-${r.id}">✕</button></td>`;
+  $('linear-tbody').appendChild(tr);
+  $('ldesc-'+r.id).addEventListener('input',e=>r.desc=e.target.value);
+  $('llen-'+r.id).addEventListener('input',e=>{r.len=parseFloat(e.target.value)||0;calcLinear()});
+  $('lqty-'+r.id).addEventListener('input',e=>{r.qty=parseInt(e.target.value)||1;updateLinCount();calcLinear()});
+  $('lrm-'+r.id).addEventListener('click',()=>removeLinRow(r.id));
+}
+function calcLinear(){
+  if(!linRows.length){$('linear-results').style.display='none';$('linear-actions').style.display='none';$('linear-warn').innerHTML='';return}
+  const sl=parseFloat($('stock-len').value)||0,kerf=parseFloat($('kerf').value)||0,lt=parseFloat($('lead-trim').value)||0,unit=gLU(),collate=$('collate-toggle').checked,eff=sl-lt;
+  if(sl<=0)return;
+  let pieces=[],warnings=[];
+  linRows.forEach(r=>{if(r.len>eff){warnings.push(`"${r.desc||'Cut'}" (${r.len} ${unit}) exceeds usable stock (${eff} ${unit}).`);return}for(let i=0;i<r.qty;i++)pieces.push({len:r.len,desc:r.desc||'Cut'})});
+  pieces.sort((a,b)=>b.len-a.len);
+  let bars=[];
+  pieces.forEach(p=>{let pl=false;for(const b of bars){const u=b.cuts.reduce((s,c)=>s+c.len+kerf,0);if(u+p.len+(b.cuts.length?kerf:0)<=eff){b.cuts.push(p);pl=true;break}}if(!pl)bars.push({cuts:[p]})});
+  $('linear-warn').innerHTML=warnings.length?`<div class="error-note">⚠ ${warnings.join('<br>')}</div>`:'';
+  if(!bars.length){$('linear-results').style.display='none';$('linear-actions').style.display='none';return}
+  let tw=0;bars.forEach(b=>{const u=b.cuts.reduce((s,c)=>s+c.len,0)+kerf*(b.cuts.length-1);tw+=eff-u});
+  const wp=(tw/(bars.length*eff)*100).toFixed(1),tp=linRows.reduce((s,r)=>s+r.qty,0);
+  $('linear-results').style.display='block';$('linear-actions').style.display='flex';
+  $('linear-metrics').innerHTML=`
+    <div class="metric-card"><div class="metric-label">Bars needed</div><div class="metric-value">${bars.length}</div></div>
+    <div class="metric-card"><div class="metric-label">Total pieces</div><div class="metric-value">${tp}</div></div>
+    <div class="metric-card"><div class="metric-label">Waste</div><div class="metric-value ${parseFloat(wp)>20?'warn':''}">${wp}<span class="metric-unit">%</span></div></div>
+    <div class="metric-card"><div class="metric-label">Total waste</div><div class="metric-value">${tw.toFixed(0)}<span class="metric-unit">${unit}</span></div></div>
+    ${lt>0?`<div class="metric-card"><div class="metric-label">Trim loss</div><div class="metric-value">${(lt*bars.length).toFixed(0)}<span class="metric-unit">${unit}</span></div></div>`:''}`;
+  let groups=[];
+  if(collate){const sm={};bars.forEach((b,i)=>{const sig=b.cuts.map(c=>c.len).sort((a,z)=>a-z).join(',');if(!sm[sig])sm[sig]={bar:b,indices:[i]};else sm[sig].indices.push(i)});Object.values(sm).forEach(g=>groups.push(g))}
+  else bars.forEach((b,i)=>groups.push({bar:b,indices:[i]}));
+  const bd=$('linear-bars');bd.innerHTML='';
+  const COLS=['#3a5bd9','#2d7dd2','#1a5276','#21618c','#2874a6','#1f618d','#2e86c1','#1a6fa5'];
+  groups.forEach(g=>{
+    const b=g.bar,idxs=g.indices,cnt=idxs.length,used=b.cuts.reduce((s,c)=>s+c.len,0)+kerf*(b.cuts.length-1),waste=eff-used;
+    const lbl=cnt>1&&collate?buildGroupLabel(idxs)+`<span class="group-badge">×${cnt} identical</span> — ${b.cuts.length} pcs each, waste: ${waste.toFixed(0)} ${unit}`:`Bar ${idxs[0]+1} — ${b.cuts.length} pcs, waste: ${waste.toFixed(0)} ${unit}`;
+    let segs='';
+    if(lt>0)segs+=`<div class="bar-seg trim" style="width:${(lt/sl*100).toFixed(2)}%"></div>`;
+    b.cuts.forEach((c,j)=>{segs+=`<div class="bar-seg" style="width:${(c.len/sl*100).toFixed(2)}%;background:${COLS[j%COLS.length]}">${c.len}</div>`;if(j<b.cuts.length-1&&kerf>0)segs+=`<div class="bar-seg kerf" style="width:${(kerf/sl*100).toFixed(2)}%"></div>`});
+    if(waste>0)segs+=`<div class="bar-seg waste" style="width:${(waste/sl*100).toFixed(2)}%">${waste.toFixed(0)}</div>`;
+    const d=document.createElement('div');d.className='bar-vis';d.innerHTML=`<div class="bar-label">${lbl}</div><div class="bar-track">${segs}</div>`;bd.appendChild(d);
+  });
+}
+
+// ====== BALUSTER ======
+$('btn-add-section').addEventListener('click',addBalSection);
+$('btn-calc-baluster').addEventListener('click',calcBaluster);
+$('btn-clear-baluster').addEventListener('click',()=>{if(confirm('Clear all sections?')){balSections=[];$('baluster-sections').innerHTML='';$('baluster-results').style.display='none';$('baluster-actions').style.display='none';$('baluster-warn').innerHTML=''}});
+$('btn-print-baluster').addEventListener('click',()=>window.print());
+$('btn-dl-baluster').addEventListener('click',()=>dlReport('baluster'));
+$('b-collate-toggle').addEventListener('change',calcBaluster);
+['b-stock-len','b-lead-trim','b-kerf'].forEach(id=>$(id).addEventListener('input',calcBaluster));
+
+function addBalSection(){
+  const last=balSections.length?balSections[balSections.length-1]:null;
+  balSections.push({id:uid(),name:'Section '+(balSections.length+1),runLen:last?last.runLen:3600,baluWidth:last?last.baluWidth:40,recGap:last?last.recGap:80,maxGap:last?last.maxGap:100,spacing:last?last.spacing:'centred',cutLen:last?last.cutLen:900,result:null});
+  buildBalSection(balSections.length-1);
+}
+function removeBalSection(id){balSections=balSections.filter(s=>s.id!==id);$('baluster-sections').innerHTML='';balSections.forEach((_,i)=>buildBalSection(i))}
+function buildBalSection(si){
+  const s=balSections[si],u=gBU(),clr=SC[si%SC.length];
+  const div=document.createElement('div');div.className='section-card';div.id='scard-'+s.id;div.style.borderLeftColor=clr;
+  div.innerHTML=`
+    <div class="section-header-row">
+      <span class="section-num-badge" style="background:${clr}">Section ${si+1}</span>
+      <div class="section-name-field"><input type="text" id="sname-${s.id}" value="${s.name}" placeholder="Section name"></div>
+      <button class="btn-danger btn-sm no-print" id="srm-${s.id}">✕</button>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Run length <span class="b-unit-tag" style="color:#3a5bd9;font-weight:700">${u}</span></label><input type="number" id="brl-${s.id}" value="${s.runLen}" min="1"></div>
+      <div class="field"><label>Baluster width <span class="b-unit-tag" style="color:#3a5bd9;font-weight:700">${u}</span></label><input type="number" id="bbw-${s.id}" value="${s.baluWidth}" min="1"></div>
+    </div>
+    <div class="field-row-3">
+      <div class="field"><label class="gap-label-rec">${gapMode==='clear'?'Recommended clear gap':'Recommended C-to-C gap'} <span class="b-unit-tag" style="color:#3a5bd9;font-weight:700">${u}</span></label><input type="number" id="brg-${s.id}" value="${s.recGap}" min="1"></div>
+      <div class="field"><label class="gap-label-max">${gapMode==='clear'?'Max clear gap':'Max C-to-C gap'} <span class="b-unit-tag" style="color:#3a5bd9;font-weight:700">${u}</span></label><input type="number" id="bmg-${s.id}" value="${s.maxGap}" min="1"></div>
+      <div class="field"><label>Cut length <span class="b-unit-tag" style="color:#3a5bd9;font-weight:700">${u}</span></label><input type="number" id="bcl-${s.id}" value="${s.cutLen}" min="1"></div>
+    </div>
+    <div class="field">
+      <label>Spacing style <span style="font-size:10px;color:#8896c8;font-weight:400;text-transform:none;letter-spacing:0">(centre-to-centre)</span></label>
+      <div class="spacing-toggle no-print" style="margin-top:5px">
+        <button class="spacing-opt ${s.spacing==='centred'?'active':''}" id="sopt-c-${s.id}">Centred layout</button>
+        <button class="spacing-opt ${s.spacing==='even'?'active':''}" id="sopt-e-${s.id}">Even spacing</button>
+      </div>
+    </div>
+    <div id="sres-${s.id}"></div>`;
+  $('baluster-sections').appendChild(div);
+  $('sname-'+s.id).addEventListener('input',e=>s.name=e.target.value);
+  $('brl-'+s.id).addEventListener('input',e=>s.runLen=parseFloat(e.target.value)||0);
+  $('bbw-'+s.id).addEventListener('input',e=>s.baluWidth=parseFloat(e.target.value)||0);
+  $('brg-'+s.id).addEventListener('input',e=>s.recGap=parseFloat(e.target.value)||0);
+  $('bmg-'+s.id).addEventListener('input',e=>s.maxGap=parseFloat(e.target.value)||0);
+  $('bcl-'+s.id).addEventListener('input',e=>s.cutLen=parseFloat(e.target.value)||0);
+  $('srm-'+s.id).addEventListener('click',()=>removeBalSection(s.id));
+  $('sopt-c-'+s.id).addEventListener('click',()=>{s.spacing='centred';$('sopt-c-'+s.id).className='spacing-opt active';$('sopt-e-'+s.id).className='spacing-opt'});
+  $('sopt-e-'+s.id).addEventListener('click',()=>{s.spacing='even';$('sopt-e-'+s.id).className='spacing-opt active';$('sopt-c-'+s.id).className='spacing-opt'});
+}
+function calcSpacing(s){
+  const recC=gapMode==='ctc'?s.recGap-s.baluWidth:s.recGap,maxC=gapMode==='ctc'?s.maxGap-s.baluWidth:s.maxGap;
+  if(recC<=0||maxC<=0)return null;
+  const pr=s.baluWidth+recC,nb=Math.round(s.runLen/pr);
+  let bestN=null,bestC=null;
+  for(const n of[nb,nb+1,nb-1]){
+    if(n<1)continue;
+    const pitch=s.runLen/n,cg=pitch-s.baluWidth;
+    if(cg>0&&cg<=maxC&&(bestN===null||Math.abs(cg-recC)<Math.abs(bestC-recC))){bestN=n;bestC=cg}
+  }
+  if(bestN===null){const nf=Math.ceil(s.runLen/(s.baluWidth+maxC));if(nf<1)return null;bestN=nf;bestC=s.runLen/nf-s.baluWidth}
+  const pitch=s.runLen/bestN;
+  return{n:bestN,pitch:parseFloat(pitch.toFixed(2)),clearGap:parseFloat(bestC.toFixed(2)),ctcGap:parseFloat((bestC+s.baluWidth).toFixed(2)),clearMargin:parseFloat((pitch/2-s.baluWidth/2).toFixed(2)),ctcMargin:parseFloat((pitch/2).toFixed(2)),recC,maxC};
+}
+function renderSecResult(s){
+  const r=s.result;if(!r)return;
+  const u=gBU(),el=$('sres-'+s.id);if(!el)return;
+  const ok=r.clearGap<=r.maxC,diff=r.clearGap-r.recC,ds=(diff>=0?'+':'')+diff.toFixed(1);
+  el.innerHTML=`<div class="section-result">
+    <div class="sr-row"><span class="sr-label">Balusters required</span><span class="sr-val ok">${r.n} pcs</span></div>
+    <div class="sr-row"><span class="sr-label">C-to-C pitch</span><span class="sr-val">${r.pitch.toFixed(1)} ${u}</span></div>
+    <div class="sr-row"><span class="sr-label">Actual clear gap (face to face)</span><span class="sr-val ${ok?'ok':'warn'}">${r.clearGap.toFixed(1)} ${u} <span style="font-size:10px;color:#8896c8">(${ds} from recommended${!ok?' · ⚠ exceeds max':''})</span></span></div>
+    <div class="sr-row"><span class="sr-label">C-to-C gap</span><span class="sr-val">${r.ctcGap.toFixed(1)} ${u}</span></div>
+    <div class="sr-row"><span class="sr-label">Clear margin each end</span><span class="sr-val">${r.clearMargin.toFixed(1)} ${u}</span></div>
+    <div class="sr-row"><span class="sr-label">C-to-C margin each end</span><span class="sr-val">${r.ctcMargin.toFixed(1)} ${u}</span></div>
+    <div class="sr-row"><span class="sr-label">Feeds into optimiser</span><span class="sr-val">${r.n} pcs × ${s.cutLen} ${u}<span class="feed-badge">✓ included</span></span></div>
+  </div>`;
+}
+function calcBaluster(){
+  if(!balSections.length){$('baluster-results').style.display='none';$('baluster-actions').style.display='none';$('baluster-warn').innerHTML='';return}
+  const sl=parseFloat($('b-stock-len').value)||0,kerf=parseFloat($('b-kerf').value)||0,lt=parseFloat($('b-lead-trim').value)||0,unit=gBU(),collate=$('b-collate-toggle').checked,eff=sl-lt;
+  let pieces=[],warnings=[];
+  balSections.forEach((s,si)=>{
+    const r=calcSpacing(s);s.result=r;renderSecResult(s);
+    if(!r){warnings.push(`Section "${s.name}": unable to calculate — check values.`);return}
+    if(r.clearGap>r.maxC)warnings.push(`Section "${s.name}": actual clear gap (${r.clearGap.toFixed(1)} ${unit}) exceeds max (${r.maxC.toFixed(1)} ${unit}).`);
+    if(s.cutLen>eff)warnings.push(`Section "${s.name}": cut length (${s.cutLen} ${unit}) exceeds usable stock (${eff} ${unit}).`);
+    else for(let i=0;i<r.n;i++)pieces.push({len:s.cutLen,desc:s.name,si});
+  });
+  $('baluster-warn').innerHTML=warnings.length?`<div class="error-note">⚠ ${warnings.join('<br>')}</div>`:'';
+  if(!pieces.length){$('baluster-results').style.display='none';$('baluster-actions').style.display='none';return}
+  pieces.sort((a,b)=>b.len-a.len);
+  let bars=[];pieces.forEach(p=>{let pl=false;for(const b of bars){const u=b.cuts.reduce((s,c)=>s+c.len+kerf,0);if(u+p.len+(b.cuts.length?kerf:0)<=eff){b.cuts.push(p);pl=true;break}}if(!pl)bars.push({cuts:[p]})});
+  let tw=0;bars.forEach(b=>{const u=b.cuts.reduce((s,c)=>s+c.len,0)+kerf*(b.cuts.length-1);tw+=eff-u});
+  const wp=(tw/(bars.length*eff)*100).toFixed(1);
+  $('baluster-results').style.display='block';$('baluster-actions').style.display='flex';
+  $('baluster-metrics').innerHTML=`
+    <div class="metric-card"><div class="metric-label">Bars needed</div><div class="metric-value">${bars.length}</div></div>
+    <div class="metric-card"><div class="metric-label">Total balusters</div><div class="metric-value">${pieces.length}</div></div>
+    <div class="metric-card"><div class="metric-label">Waste</div><div class="metric-value ${parseFloat(wp)>20?'warn':''}">${wp}<span class="metric-unit">%</span></div></div>
+    <div class="metric-card"><div class="metric-label">Total waste</div><div class="metric-value">${tw.toFixed(0)}<span class="metric-unit">${unit}</span></div></div>
+    ${lt>0?`<div class="metric-card"><div class="metric-label">Trim loss</div><div class="metric-value">${(lt*bars.length).toFixed(0)}<span class="metric-unit">${unit}</span></div></div>`:''}`;
+  let groups=[];
+  if(collate){const sm={};bars.forEach((b,i)=>{const sig=b.cuts.map(c=>c.len).sort((a,z)=>a-z).join(',');if(!sm[sig])sm[sig]={bar:b,indices:[i]};else sm[sig].indices.push(i)});Object.values(sm).forEach(g=>groups.push(g))}
+  else bars.forEach((b,i)=>groups.push({bar:b,indices:[i]}));
+  const bd=$('baluster-bars');bd.innerHTML='';
+  groups.forEach(g=>{
+    const b=g.bar,idxs=g.indices,cnt=idxs.length,used=b.cuts.reduce((s,c)=>s+c.len,0)+kerf*(b.cuts.length-1),waste=eff-used;
+    const lbl=cnt>1&&collate?buildGroupLabel(idxs)+`<span class="group-badge">×${cnt} identical</span> — ${b.cuts.length} pcs each, waste: ${waste.toFixed(0)} ${unit}`:`Bar ${idxs[0]+1} — ${b.cuts.length} pcs, waste: ${waste.toFixed(0)} ${unit}`;
+    let segs='';
+    if(lt>0)segs+=`<div class="bar-seg trim" style="width:${(lt/sl*100).toFixed(2)}%"></div>`;
+    b.cuts.forEach((c,j)=>{const clr=SC[c.si%SC.length];segs+=`<div class="bar-seg" style="width:${(c.len/sl*100).toFixed(2)}%;background:${clr}">${c.len}</div>`;if(j<b.cuts.length-1&&kerf>0)segs+=`<div class="bar-seg kerf" style="width:${(kerf/sl*100).toFixed(2)}%"></div>`});
+    if(waste>0)segs+=`<div class="bar-seg waste" style="width:${(waste/sl*100).toFixed(2)}%">${waste.toFixed(0)}</div>`;
+    const d=document.createElement('div');d.className='bar-vis';d.innerHTML=`<div class="bar-label">${lbl}</div><div class="bar-track">${segs}</div>`;bd.appendChild(d);
+  });
+  const leg=$('baluster-legend');leg.innerHTML='';
+  balSections.forEach((s,si)=>{if(s.result&&s.result.n>0){const li=document.createElement('div');li.className='legend-item';li.innerHTML=`<div class="legend-dot" style="background:${SC[si%SC.length]}"></div>${s.name||'Section '+(si+1)}`;leg.appendChild(li)}});
+}
+
+// ====== SHEET ======
+$('btn-add-sheet').addEventListener('click',addSheetRow);
+$('btn-calc-sheet').addEventListener('click',calcSheet);
+$('btn-clear-sheet').addEventListener('click',()=>{if(confirm('Clear all panels?')){sheetRows=[];$('sheet-tbody').innerHTML='';$('sheet-results').style.display='none';$('sheet-actions').style.display='none';$('sheet-warn').innerHTML='';$('sht-count').textContent='0 panels'}});
+$('btn-print-sheet').addEventListener('click',()=>window.print());
+$('btn-dl-sheet').addEventListener('click',()=>dlReport('sheet'));
+['sheet-w','sheet-h','sheet-kerf'].forEach(id=>$(id).addEventListener('input',calcSheet));
+
+function addSheetRow(){sheetRows.push({id:uid(),desc:'',w:600,h:400,qty:1,canRotate:true});buildSheetRow(sheetRows.length-1);updateShtCount()}
+function removeSheetRow(id){sheetRows=sheetRows.filter(r=>r.id!==id);$('sheet-tbody').innerHTML='';sheetRows.forEach((_,i)=>buildSheetRow(i));updateShtCount();calcSheet()}
+function updateShtCount(){$('sht-count').textContent=sheetRows.reduce((s,r)=>s+r.qty,0)+' panels'}
+function buildSheetRow(i){
+  const r=sheetRows[i],u=gSU(),tr=document.createElement('tr');tr.id='srow-'+r.id;
+  tr.innerHTML=`<td><input type="text" id="sdesc-${r.id}" value="${r.desc}" placeholder="Panel" style="width:100%;padding:5px 6px!important;font-size:11px!important"></td>
+  <td><div style="display:flex;align-items:center;gap:2px"><input type="number" id="sw-${r.id}" value="${r.w}" min="1" style="width:100%;padding:5px 6px!important;font-size:11px!important"><span class="s-unit-tag" style="font-size:9px;color:#3a5bd9;font-weight:700;white-space:nowrap">${u}</span></div></td>
+  <td><div style="display:flex;align-items:center;gap:2px"><input type="number" id="sh-${r.id}" value="${r.h}" min="1" style="width:100%;padding:5px 6px!important;font-size:11px!important"><span class="s-unit-tag" style="font-size:9px;color:#3a5bd9;font-weight:700;white-space:nowrap">${u}</span></div></td>
+  <td><input type="number" id="sq-${r.id}" value="${r.qty}" min="1" style="width:100%;padding:5px 6px!important;font-size:11px!important"></td>
+  <td style="text-align:center"><button class="rot-btn ${r.canRotate?'free':'locked'}" id="rbtn-${r.id}">${r.canRotate?'↻':'🔒'}</button> <span id="rlbl-${r.id}" style="font-size:10px;color:#8896c8">${r.canRotate?'Free':'Locked'}</span></td>
+  <td><button class="btn-danger btn-sm" id="srm2-${r.id}">✕</button></td>`;
+  $('sheet-tbody').appendChild(tr);
+  $('sdesc-'+r.id).addEventListener('input',e=>r.desc=e.target.value);
+  $('sw-'+r.id).addEventListener('input',e=>{r.w=parseFloat(e.target.value)||0;calcSheet()});
+  $('sh-'+r.id).addEventListener('input',e=>{r.h=parseFloat(e.target.value)||0;calcSheet()});
+  $('sq-'+r.id).addEventListener('input',e=>{r.qty=parseInt(e.target.value)||1;updateShtCount();calcSheet()});
+  $('rbtn-'+r.id).addEventListener('click',()=>{r.canRotate=!r.canRotate;$('rbtn-'+r.id).className='rot-btn '+(r.canRotate?'free':'locked');$('rbtn-'+r.id).innerHTML=r.canRotate?'↻':'🔒';$('rlbl-'+r.id).textContent=r.canRotate?'Free':'Locked';calcSheet()});
+  $('srm2-'+r.id).addEventListener('click',()=>removeSheetRow(r.id));
+}
+function tryPlace(sheet,panel,kerf){for(let i=0;i<sheet.freeRects.length;i++){const fr=sheet.freeRects[i];if(panel.pw<=fr.w&&panel.ph<=fr.h){sheet.placements.push({x:fr.x,y:fr.y,pw:panel.pw,ph:panel.ph,desc:panel.desc,rotated:panel.rotated,origW:panel.origW,origH:panel.origH});const nr=[{x:fr.x+panel.pw+kerf,y:fr.y,w:fr.w-panel.pw-kerf,h:panel.ph},{x:fr.x,y:fr.y+panel.ph+kerf,w:fr.w,h:fr.h-panel.ph-kerf}];sheet.freeRects.splice(i,1);nr.forEach(r=>{if(r.w>0&&r.h>0)sheet.freeRects.push(r)});return true}}return false}
+function tryPlaceRot(sheet,panel,kerf){const n={pw:panel.w,ph:panel.h,desc:panel.desc,rotated:false,origW:panel.w,origH:panel.h};if(tryPlace(sheet,n,kerf))return true;if(panel.canRotate&&panel.w!==panel.h){const r={pw:panel.h,ph:panel.w,desc:panel.desc,rotated:true,origW:panel.w,origH:panel.h};if(tryPlace(sheet,r,kerf))return true}return false}
+function calcSheet(){
+  if(!sheetRows.length){$('sheet-results').style.display='none';$('sheet-actions').style.display='none';$('sheet-warn').innerHTML='';return}
+  const sw=parseFloat($('sheet-w').value)||0,sh=parseFloat($('sheet-h').value)||0,kerf=parseFloat($('sheet-kerf').value)||0,unit=gSU();
+  if(sw<=0||sh<=0)return;
+  let panels=[],warnings=[];
+  sheetRows.forEach(r=>{const fits=(r.w<=sw&&r.h<=sh)||(r.canRotate&&r.h<=sw&&r.w<=sh);if(!fits){warnings.push(`"${r.desc||'Panel'}" (${r.w}×${r.h} ${unit}) cannot fit on sheet (${sw}×${sh} ${unit}).`);return}for(let i=0;i<r.qty;i++)panels.push({w:r.w,h:r.h,desc:r.desc||'Panel',canRotate:r.canRotate})});
+  panels.sort((a,b)=>(b.w*b.h)-(a.w*a.h));
+  $('sheet-warn').innerHTML=warnings.length?`<div class="error-note">⚠ ${warnings.join('<br>')}</div>`:'';
+  let sheets=[];panels.forEach(p=>{let pl=false;for(const s of sheets){if(tryPlaceRot(s,p,kerf)){pl=true;break}}if(!pl){const ns={placements:[],freeRects:[{x:0,y:0,w:sw,h:sh}]};if(tryPlaceRot(ns,p,kerf))sheets.push(ns)}});
+  const ua=panels.reduce((s,p)=>s+p.w*p.h,0),ta=sheets.length*sw*sh,wa=ta-ua,wp=(wa/ta*100).toFixed(1),rc=sheets.reduce((s,sh2)=>s+sh2.placements.filter(p=>p.rotated).length,0);
+  $('sheet-results').style.display='block';$('sheet-actions').style.display='flex';
+  $('sheet-metrics').innerHTML=`
+    <div class="metric-card"><div class="metric-label">Sheets needed</div><div class="metric-value">${sheets.length}</div></div>
+    <div class="metric-card"><div class="metric-label">Total panels</div><div class="metric-value">${panels.length}</div></div>
+    <div class="metric-card"><div class="metric-label">Waste</div><div class="metric-value ${parseFloat(wp)>20?'warn':''}">${wp}<span class="metric-unit">%</span></div></div>
+    <div class="metric-card"><div class="metric-label">Waste area</div><div class="metric-value">${wa.toFixed(0)}<span class="metric-unit">${unit}²</span></div></div>
+    <div class="metric-card"><div class="metric-label">Panels rotated</div><div class="metric-value">${rc}</div></div>`;
+  const vis=$('sheet-vis');vis.innerHTML='';
+  const COLS_N=['#3a5bd9','#2d5ba8','#1a3a7a','#21618c','#2874a6','#1f618d'],COLS_R=['#1a8a55','#16a085','#2e7d32','#1a6a40'];
+  const scale=Math.min(580/sw,260/sh);
+  sheets.forEach((s,si)=>{
+    const svgW=Math.round(sw*scale),svgH=Math.round(sh*scale);let rects='';
+    s.placements.forEach((pl,pi)=>{
+      const x=Math.round(pl.x*scale),y=Math.round(pl.y*scale),w=Math.round(pl.pw*scale),h=Math.round(pl.ph*scale);
+      const clr=pl.rotated?COLS_R[pi%COLS_R.length]:COLS_N[pi%COLS_N.length];
+      const sc=pl.rotated?'#1a8a55':'#2a4ac0',dash=pl.rotated?'stroke-dasharray="4,2"':'';
+      const fs=Math.min(11,Math.min(w,h)/3.5);
+      rects+=`<rect x="${x+1}" y="${y+1}" width="${w-2}" height="${h-2}" fill="${clr}" stroke="${sc}" stroke-width="1.5" ${dash} rx="2"/>`;
+      if(w>30&&h>20)rects+=`<text x="${x+w/2}" y="${y+h/2-5}" text-anchor="middle" dominant-baseline="middle" font-size="${fs}" fill="#fff" font-family="Segoe UI,sans-serif" font-weight="700">${pl.desc}</text>`;
+      if(w>40&&h>30)rects+=`<text x="${x+w/2}" y="${y+h/2+9}" text-anchor="middle" dominant-baseline="middle" font-size="${Math.min(9,fs*.85)}" fill="rgba(255,255,255,.85)" font-family="Segoe UI,sans-serif">${pl.rotated?`${pl.origH}×${pl.origW} ↻`:`${pl.origW}×${pl.origH}`}</text>`;
+    });
+    const rn=s.placements.filter(p=>p.rotated).length,wrap=document.createElement('div');wrap.style.marginBottom='14px';
+    wrap.innerHTML=`<div class="bar-label" style="margin-bottom:5px;font-weight:700;color:#1a2340">Sheet ${si+1} — ${s.placements.length} panel${s.placements.length!==1?'s':''}${rn>0?` · ${rn} rotated`:''}</div><svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}" style="border:1.5px solid #dde2f0;border-radius:6px;background:#f0f2f8;display:block"><rect width="${svgW}" height="${svgH}" fill="#f0f2f8"/>${rects}</svg>`;
+    vis.appendChild(wrap);
+  });
+}
+
+// ====== PROJECT ======
+function getProj(){return{name:$('proj-name').value||'—',client:$('proj-client').value||'—',by:$('proj-by').value||'N.Calatrava',notes:$('proj-notes').value||''}}
+
+// ====== REPORT ======
+function dlReport(type){
+  const proj=getProj(),now=new Date().toLocaleString(),unit=type==='linear'?gLU():type==='baluster'?gBU():gSU();
+  const css=`*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f8;color:#1a2340}.page{max-width:900px;margin:0 auto;padding:28px}.hdr{display:flex;align-items:center;justify-content:space-between;background:#1e2e6e;border-radius:10px;padding:14px 20px;margin-bottom:18px}.hl{display:flex;align-items:center;gap:12px}.hb{font-size:18px;font-weight:800;color:#fff}.hs{font-size:10px;font-weight:700;color:#7ecfb3;letter-spacing:.16em;text-transform:uppercase}.ha{font-size:10px;color:#8896c8}.hv{font-size:10px;color:#8896c8;background:rgba(255,255,255,.1);padding:3px 10px;border-radius:20px}.pb{background:#fff;border:1px solid #e2e6f0;border-radius:8px;padding:14px 18px;margin-bottom:14px}.pg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 16px;font-size:12px}.pf label{font-size:9px;color:#8896c8;text-transform:uppercase;letter-spacing:.5px;font-weight:700;display:block;margin-bottom:1px}.pf span{color:#1a2340;font-weight:600}.sec{background:#fff;border:1px solid #e2e6f0;border-radius:8px;padding:14px 18px;margin-bottom:14px}.sec h2{font-size:10px;font-weight:700;color:#8896c8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;border-bottom:2px solid #eef0f8;padding-bottom:6px}.sc{padding-left:10px;margin-bottom:12px;border-left-width:4px;border-left-style:solid}table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:4px}th{text-align:left;color:#fff;background:#1e2e6e;padding:6px 10px;font-size:9px;text-transform:uppercase;letter-spacing:.5px}td{padding:5px 10px;border-bottom:1px solid #eef0f8}tr:nth-child(even) td{background:#f8f9fc}.mr{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}.mt{background:#f0f3ff;border-radius:6px;padding:10px 14px;min-width:90px;border:1px solid #d0d8f0}.ml{font-size:9px;color:#8896c8;text-transform:uppercase;letter-spacing:.5px;font-weight:700}.mv{font-size:18px;font-weight:800;color:#3a5bd9}.mv.w{color:#c07a10}.tag{background:#e8eeff;color:#3a5bd9;border-radius:20px;padding:1px 7px;font-size:9px;font-weight:700}.ok{color:#1a8a55;font-weight:700}.wn{color:#c07a10;font-weight:700}.ry{background:#e6f9f0;color:#1a8a55;border-radius:20px;padding:1px 7px;font-size:9px;font-weight:700}.lk{background:#fff5e0;color:#c07a10;border-radius:20px;padding:1px 7px;font-size:9px;font-weight:700}.ft{text-align:center;font-size:10px;color:#8896c8;margin-top:18px;padding-top:10px;border-top:1px solid #e2e6f0}@media print{body{background:#fff}.page{padding:14px}@page{margin:1cm}}`;
+  const catsvg=`<svg width="40" height="36" viewBox="0 0 52 44" fill="none"><path d="M6 38 C6 38 4 35 4 30 C4 22 8 18 10 16 C10 16 9 12 10 8 C11 5 13 4 14 6 C15 8 15 11 15 11 C18 9 22 8 26 8 C30 8 34 9 37 11 C37 11 37 8 38 6 C39 4 41 5 42 8 C43 12 42 16 42 16 C44 18 48 22 48 30 C48 35 46 38 46 38 L44 40 C44 40 38 42 26 42 C14 42 8 40 8 40 Z" fill="#e8a87c" stroke="#c87a45" stroke-width="1"/><ellipse cx="20" cy="22" rx="2.5" ry="3" fill="#1e2e6e"/><ellipse cx="32" cy="22" rx="2.5" ry="3" fill="#1e2e6e"/><path d="M23 28 Q26 31 29 28" stroke="#c87a45" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>`;
+  let body=`<div class="hdr"><div class="hl">${catsvg}<div><div class="hb">CATstimate</div><div class="hs">Cutting list report</div><div class="ha">by N.Calatrava</div></div></div><div class="hv">v${VERSION} · ${VD}</div></div>`;
+  body+=`<div class="pb"><div class="pg"><div class="pf"><label>Project</label><span>${proj.name}</span></div><div class="pf"><label>Client</label><span>${proj.client}</span></div><div class="pf"><label>Prepared by</label><span>${proj.by}</span></div><div class="pf" style="grid-column:1/-1"><label>Generated</label><span>${now}</span></div>${proj.notes?`<div class="pf" style="grid-column:1/-1"><label>Notes</label><span>${proj.notes}</span></div>`:''}</div></div>`;
+
+  if(type==='linear'){
+    const sl=parseFloat($('stock-len').value)||0,kerf=parseFloat($('kerf').value)||0,lt=parseFloat($('lead-trim').value)||0,eff=sl-lt,collate=$('collate-toggle').checked;
+    body+=`<div class="sec"><h2>Stock settings</h2><table><thead><tr><th>Parameter</th><th>Value</th></tr></thead><tbody><tr><td>Stock length</td><td><strong>${sl} ${unit}</strong></td></tr><tr><td>Lead trim</td><td>${lt} ${unit}</td></tr><tr><td>Usable per bar</td><td><strong>${eff} ${unit}</strong></td></tr><tr><td>Kerf</td><td>${kerf} ${unit}</td></tr></tbody></table></div>`;
+    body+=`<div class="sec"><h2>Cut list</h2><table><thead><tr><th>#</th><th>Description</th><th>Length (${unit})</th><th>Qty</th><th>Total (${unit})</th></tr></thead><tbody>`;
+    let tp=0,tl=0;linRows.forEach((r,i)=>{tp+=r.qty;tl+=r.len*r.qty;body+=`<tr><td>${i+1}</td><td>${r.desc||'—'}</td><td>${r.len}</td><td>${r.qty}</td><td>${(r.len*r.qty).toFixed(0)}</td></tr>`});
+    body+=`<tr style="font-weight:700;background:#f0f3ff"><td colspan="3">Total</td><td>${tp}</td><td>${tl.toFixed(0)}</td></tr></tbody></table></div>`;
+    let pieces=[];linRows.forEach(r=>{if(r.len<=(sl-lt))for(let i=0;i<r.qty;i++)pieces.push({len:r.len,desc:r.desc||'Cut'})});pieces.sort((a,b)=>b.len-a.len);
+    let bars=[];pieces.forEach(p=>{let pl=false;for(const b of bars){const u=b.cuts.reduce((s,c)=>s+c.len+kerf,0);if(u+p.len+(b.cuts.length?kerf:0)<=eff){b.cuts.push(p);pl=true;break}}if(!pl)bars.push({cuts:[p]})});
+    if(!bars.length){body+=`<div class="sec"><h2>Summary</h2><p>No valid cuts to optimise.</p></div>`}
+    else{
+      const tw=bars.reduce((s,b)=>{const u=b.cuts.reduce((x,c)=>x+c.len,0)+kerf*(b.cuts.length-1);return s+(eff-u)},0),wp=(tw/(bars.length*eff)*100).toFixed(1);
+      body+=`<div class="sec"><h2>Summary</h2><div class="mr"><div class="mt"><div class="ml">Bars needed</div><div class="mv">${bars.length}</div></div><div class="mt"><div class="ml">Pieces</div><div class="mv">${tp}</div></div><div class="mt"><div class="ml">Waste</div><div class="mv ${parseFloat(wp)>20?'w':''}">${wp}%</div></div><div class="mt"><div class="ml">Total waste</div><div class="mv">${tw.toFixed(0)} ${unit}</div></div></div>`;
+      body+=`<table><thead><tr><th>Bar(s)</th><th>Pieces placed</th><th>Used (${unit})</th><th>Waste (${unit})</th></tr></thead><tbody>`;
+      if(collate){const sm={};bars.forEach((b,i)=>{const sig=b.cuts.map(c=>c.len).sort((a,z)=>a-z).join(',');if(!sm[sig])sm[sig]={bar:b,indices:[i]};else sm[sig].indices.push(i)});Object.values(sm).forEach(g=>{const b=g.bar,nums=g.indices.map(i=>i+1);const u=b.cuts.reduce((s,c)=>s+c.len,0)+kerf*(b.cuts.length-1);let lbl='';if(nums.length===1)lbl='Bar '+nums[0];else if(nums[nums.length-1]-nums[0]===nums.length-1)lbl=`Bar ${nums[0]}–${nums[nums.length-1]} <span class="tag">×${nums.length}</span>`;else lbl='Bar '+nums.join(', ')+` <span class="tag">×${nums.length}</span>`;body+=`<tr><td>${lbl}</td><td>${b.cuts.map(c=>`${c.desc} (${c.len})`).join(', ')}</td><td>${u.toFixed(0)}</td><td>${(eff-u).toFixed(0)}</td></tr>`})}
+      else bars.forEach((b,i)=>{const u=b.cuts.reduce((s,c)=>s+c.len,0)+kerf*(b.cuts.length-1);body+=`<tr><td>Bar ${i+1}</td><td>${b.cuts.map(c=>`${c.desc} (${c.len})`).join(', ')}</td><td>${u.toFixed(0)}</td><td>${(eff-u).toFixed(0)}</td></tr>`});
+      body+=`</tbody></table></div>`;
+    }
+  } else if(type==='baluster'){
+    const sl=parseFloat($('b-stock-len').value)||0,kerf=parseFloat($('b-kerf').value)||0,lt=parseFloat($('b-lead-trim').value)||0,eff=sl-lt,collate=$('b-collate-toggle').checked;
+    body+=`<div class="sec"><h2>Stock settings</h2><table><thead><tr><th>Parameter</th><th>Value</th></tr></thead><tbody><tr><td>Stock length</td><td><strong>${sl} ${unit}</strong></td></tr><tr><td>Lead trim</td><td>${lt} ${unit}</td></tr><tr><td>Usable per bar</td><td><strong>${eff} ${unit}</strong></td></tr><tr><td>Kerf</td><td>${kerf} ${unit}</td></tr><tr><td>Gap input type</td><td>${gapMode==='ctc'?'Centre to centre':'Clear gap (face to face)'}</td></tr></tbody></table></div>`;
+    body+=`<div class="sec"><h2>Section spacing results</h2>`;
+    balSections.forEach((s,si)=>{if(!s.result)return;const r=s.result,clr=SC[si%SC.length],ok=r.clearGap<=r.maxC,diff=r.clearGap-r.recC,ds=(diff>=0?'+':'')+diff.toFixed(1);
+    body+=`<div class="sc" style="border-left-color:${clr}"><strong style="color:${clr};font-size:12px">${s.name}</strong><table style="margin-top:6px"><thead><tr><th>Parameter</th><th>Value</th></tr></thead><tbody><tr><td>Run length</td><td>${s.runLen} ${unit}</td></tr><tr><td>Baluster width</td><td>${s.baluWidth} ${unit}</td></tr><tr><td>Recommended gap input</td><td>${s.recGap} ${unit}</td></tr><tr><td>Max gap input</td><td>${s.maxGap} ${unit}</td></tr><tr><td>Spacing style</td><td>${s.spacing==='centred'?'Centred layout':'Even spacing'}</td></tr><tr><td>Balusters required</td><td><span class="ok">${r.n} pcs</span></td></tr><tr><td>C-to-C pitch</td><td>${r.pitch.toFixed(1)} ${unit}</td></tr><tr><td>Actual clear gap</td><td><span class="${ok?'ok':'wn'}">${r.clearGap.toFixed(1)} ${unit} (${ds} from recommended${!ok?' · ⚠ exceeds max':''})</span></td></tr><tr><td>C-to-C gap</td><td>${r.ctcGap.toFixed(1)} ${unit}</td></tr><tr><td>Clear margin each end</td><td>${r.clearMargin.toFixed(1)} ${unit}</td></tr><tr><td>C-to-C margin each end</td><td>${r.ctcMargin.toFixed(1)} ${unit}</td></tr><tr><td>Cut length</td><td>${s.cutLen} ${unit}</td></tr></tbody></table></div>`});
+    body+=`</div>`;
+    let allP=[];balSections.forEach((s,si)=>{if(s.result&&s.cutLen<=eff)for(let i=0;i<s.result.n;i++)allP.push({len:s.cutLen,desc:s.name,si})});allP.sort((a,b)=>b.len-a.len);
+    let bars=[];allP.forEach(p=>{let pl=false;for(const b of bars){const u=b.cuts.reduce((s,c)=>s+c.len+kerf,0);if(u+p.len+(b.cuts.length?kerf:0)<=eff){b.cuts.push(p);pl=true;break}}if(!pl)bars.push({cuts:[p]})});
+    if(bars.length){const tw=bars.reduce((s,b)=>{const u=b.cuts.reduce((x,c)=>x+c.len,0)+kerf*(b.cuts.length-1);return s+(eff-u)},0),wp=(tw/(bars.length*eff)*100).toFixed(1);
+    body+=`<div class="sec"><h2>Cut optimiser summary</h2><div class="mr"><div class="mt"><div class="ml">Bars needed</div><div class="mv">${bars.length}</div></div><div class="mt"><div class="ml">Total balusters</div><div class="mv">${allP.length}</div></div><div class="mt"><div class="ml">Waste</div><div class="mv ${parseFloat(wp)>20?'w':''}">${wp}%</div></div><div class="mt"><div class="ml">Total waste</div><div class="mv">${tw.toFixed(0)} ${unit}</div></div></div>`;
+    body+=`<table><thead><tr><th>Bar(s)</th><th>Pieces placed</th><th>Used (${unit})</th><th>Waste (${unit})</th></tr></thead><tbody>`;
+    if(collate){const sm={};bars.forEach((b,i)=>{const sig=b.cuts.map(c=>c.len).sort((a,z)=>a-z).join(',');if(!sm[sig])sm[sig]={bar:b,indices:[i]};else sm[sig].indices.push(i)});Object.values(sm).forEach(g=>{const b=g.bar,nums=g.indices.map(i=>i+1);const u=b.cuts.reduce((s,c)=>s+c.len,0)+kerf*(b.cuts.length-1);let lbl='';if(nums.length===1)lbl='Bar '+nums[0];else if(nums[nums.length-1]-nums[0]===nums.length-1)lbl=`Bar ${nums[0]}–${nums[nums.length-1]} <span class="tag">×${nums.length}</span>`;else lbl='Bar '+nums.join(', ')+` <span class="tag">×${nums.length}</span>`;body+=`<tr><td>${lbl}</td><td>${b.cuts.map(c=>`${c.desc} (${c.len})`).join(', ')}</td><td>${u.toFixed(0)}</td><td>${(eff-u).toFixed(0)}</td></tr>`})}
+    else bars.forEach((b,i)=>{const u=b.cuts.reduce((s,c)=>s+c.len,0)+kerf*(b.cuts.length-1);body+=`<tr><td>Bar ${i+1}</td><td>${b.cuts.map(c=>`${c.desc} (${c.len})`).join(', ')}</td><td>${u.toFixed(0)}</td><td>${(eff-u).toFixed(0)}</td></tr>`});
+    body+=`</tbody></table></div>`}
+  } else {
+    const sw=parseFloat($('sheet-w').value)||0,sh2=parseFloat($('sheet-h').value)||0,kerf=parseFloat($('sheet-kerf').value)||0;
+    body+=`<div class="sec"><h2>Sheet settings</h2><table><thead><tr><th>Parameter</th><th>Value</th></tr></thead><tbody><tr><td>Sheet size</td><td><strong>${sw}×${sh2} ${unit}</strong></td></tr><tr><td>Sheet area</td><td>${(sw*sh2).toFixed(0)} ${unit}²</td></tr><tr><td>Kerf</td><td>${kerf} ${unit}</td></tr></tbody></table></div>`;
+    body+=`<div class="sec"><h2>Panel cut list</h2><table><thead><tr><th>#</th><th>Description</th><th>W (${unit})</th><th>H (${unit})</th><th>Qty</th><th>Rotation</th></tr></thead><tbody>`;
+    sheetRows.forEach((r,i)=>{body+=`<tr><td>${i+1}</td><td>${r.desc||'—'}</td><td>${r.w}</td><td>${r.h}</td><td>${r.qty}</td><td>${r.canRotate?'<span class="ry">Allowed</span>':'<span class="lk">Locked</span>'}</td></tr>`});
+    body+=`</tbody></table></div>`;
+    let panels=[];sheetRows.forEach(r=>{const fits=(r.w<=sw&&r.h<=sh2)||(r.canRotate&&r.h<=sw&&r.w<=sh2);if(fits)for(let i=0;i<r.qty;i++)panels.push({w:r.w,h:r.h,desc:r.desc||'Panel',canRotate:r.canRotate})});panels.sort((a,b)=>(b.w*b.h)-(a.w*a.h));
+    let sheets=[];panels.forEach(p=>{let pl=false;for(const s of sheets){if(tryPlaceRot(s,p,kerf)){pl=true;break}}if(!pl){const ns={placements:[],freeRects:[{x:0,y:0,w:sw,h:sh2}]};if(tryPlaceRot(ns,p,kerf))sheets.push(ns)}});
+    const ua=panels.reduce((s,p)=>s+p.w*p.h,0),ta=sheets.length*sw*sh2,wa=ta-ua,wp=(wa/ta*100).toFixed(1),rc=sheets.reduce((s,sh3)=>s+sh3.placements.filter(p=>p.rotated).length,0);
+    body+=`<div class="sec"><h2>Summary</h2><div class="mr"><div class="mt"><div class="ml">Sheets</div><div class="mv">${sheets.length}</div></div><div class="mt"><div class="ml">Panels</div><div class="mv">${panels.length}</div></div><div class="mt"><div class="ml">Waste</div><div class="mv ${parseFloat(wp)>20?'w':''}">${wp}%</div></div><div class="mt"><div class="ml">Waste area</div><div class="mv">${wa.toFixed(0)} ${unit}²</div></div><div class="mt"><div class="ml">Rotated</div><div class="mv">${rc}</div></div></div>`;
+    body+=`<table><thead><tr><th>Sheet</th><th>Panel</th><th>Placed as</th><th>Rotated</th><th>Position</th></tr></thead><tbody>`;
+    sheets.forEach((s,i)=>{s.placements.forEach(p=>{body+=`<tr><td>Sheet ${i+1}</td><td>${p.desc}</td><td>${p.pw}×${p.ph} ${unit}</td><td>${p.rotated?'<span class="ry">Yes ↻</span>':'No'}</td><td>${p.x.toFixed(0)}, ${p.y.toFixed(0)}</td></tr>`})});
+    body+=`</tbody></table></div>`;
+  }
+  body+=`<div class="ft">CATstimate v${VERSION} · by N.Calatrava · Free to use · No internet required · ${now}</div>`;
+  const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>CATstimate Report — ${proj.name}</title><style>${css}</style></head><body><div class="page">${body}</div></body></html>`;
+  const fname=`CATstimate-${type}-${(proj.name||'Report').replace(/[^a-z0-9]/gi,'_').slice(0,25)}-${Date.now()}.html`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=fname;a.click();
+}
+
+// ====== INIT ======
+rebuildLinPresets();rebuildBalPresets();rebuildShtPresets();
+addLinRow();addLinRow();
+addSheetRow();
+addBalSection();
+});
+</script>
+</body>
+</html>
